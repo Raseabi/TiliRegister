@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="user-authentication-1" author="alphonce">
+        <createTable tableName="user_authentication">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="password" type="LONGTEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="password_status" type="VARCHAR(50)" defaultValue="NEW"/>
+
+            <column name="password_date_modified" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="login_attempts" type="INT" defaultValueNumeric="1"/>
+
+            <column name="reset_password_attempts" type="INT" defaultValueNumeric="1"/>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="user_authentication"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_user_auth_user"/>
+    </changeSet>
+    <changeSet id="insert-user-authentication-1" author="alphonce">
+        <insert tableName="user_authentication">
+            <column name="id" valueNumeric="1"/>
+            <column name="user_id" valueNumeric="1"/>
+            <column name="password" value="$2y$10$xyIKOf3Bh8rquZTkLrpQ2.JFX5A8GB5BVXET9iDKw.d.UEsLtFQLi"/>
+            <column name="password_status" value="NEW"/>
+            <column name="password_date_modified" valueDate="2025-06-23T14:00:00"/>
+            <column name="login_attempts" valueNumeric="1"/>
+            <column name="reset_password_attempts" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

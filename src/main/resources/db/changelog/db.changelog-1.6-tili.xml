@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <!-- Tili group -->
+    <changeSet id="create-tili_groups-1" author="alphonce">
+        <createTable tableName="tili_groups">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="voided" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="BIGINT"/>
+            <column name="voided_at" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Tills -->
+    <changeSet id="create-tills-1" author="alphonce">
+        <createTable tableName="tills">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tili_group_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(120)"/>
+            <column name="current_float" type="DECIMAL(12,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_cash_in_hand" type="DECIMAL(12,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="voided" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="BIGINT"/>
+            <column name="voided_at" type="TIMESTAMP"/>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="tills"
+                baseColumnNames="tili_group_id"
+                constraintName="fk_tills_tili_group"
+                referencedTableName="tili_groups"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <!-- Till Functions -->
+    <changeSet id="create-till-functions-1" author="alphonce">
+        <createTable tableName="till_functions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(120)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="float_change_direction" type="ENUM('in','out','none')" defaultValue="none">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cash_change_direction" type="ENUM('in','out','none')" defaultValue="none">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deletable" type="INTEGER" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="voided" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="BIGINT"/>
+            <column name="voided_at" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="insert-create-till-functions-1" author="alphonce">
+        <insert tableName="till_functions">
+            <column name="name" value="Deposit"/>
+            <column name="float_change_direction" value="out"/>
+            <column name="cash_change_direction" value="in"/>
+            <column name="deletable" valueNumeric="0"/>
+            <column name="description" value="Deposit. Float out, cash in"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="created_at" valueDate="2025-06-23T14:00:00"/>
+        </insert>
+        <insert tableName="till_functions">
+            <column name="name" value="Withdrawal"/>
+            <column name="float_change_direction" value="in"/>
+            <column name="cash_change_direction" value="out"/>
+            <column name="deletable" valueNumeric="0"/>
+            <column name="description" value="Withdrawal. Float in, cash out"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="created_at" valueDate="2025-06-23T14:00:00"/>
+        </insert>
+        <insert tableName="till_functions">
+            <column name="name" value="Merchant"/>
+            <column name="float_change_direction" value="in"/>
+            <column name="cash_change_direction" value="none"/>
+            <column name="deletable" valueNumeric="0"/>
+            <column name="description" value="Merchant Payment. Float in, cash none"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="created_at" valueDate="2025-06-23T14:00:00"/>
+        </insert>
+        <insert tableName="till_functions">
+            <column name="name" value="Electricity purchase"/>
+            <column name="float_change_direction" value="out"/>
+            <column name="cash_change_direction" value="in"/>
+            <column name="deletable" valueNumeric="1"/>
+            <column name="description" value="Purchase electricity. Float out, cash in"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="created_at" valueDate="2025-06-23T14:00:00"/>
+        </insert>
+        <insert tableName="till_functions">
+            <column name="name" value="DSTV payment"/>
+            <column name="float_change_direction" value="out"/>
+            <column name="cash_change_direction" value="in"/>
+            <column name="deletable" valueNumeric="1"/>
+            <column name="description" value="DSTV Payment. Float out, cash in"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="created_at" valueDate="2025-06-23T14:00:00"/>
+        </insert>
+        <insert tableName="till_functions">
+            <column name="name" value="Water bill payment"/>
+            <column name="float_change_direction" value="out"/>
+            <column name="cash_change_direction" value="in"/>
+            <column name="deletable" valueNumeric="1"/>
+            <column name="description" value="Water bill payment. Float out, cash in"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="created_at" valueDate="2025-06-23T14:00:00"/>
+        </insert>
+    </changeSet>
+
+    <!-- Till Function Mapping -->
+    <changeSet id="create-till-function-map-1" author="alphonce">
+        <createTable tableName="till_function_map">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="till_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="till_function_map"
+                baseColumnNames="till_id"
+                constraintName="fk_function_map_till"
+                referencedTableName="tills"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="till_function_map"
+                baseColumnNames="function_id"
+                constraintName="fk_function_map_function"
+                referencedTableName="till_functions"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <!-- Transactions -->
+    <changeSet id="create-transactions-6" author="alphonce">
+        <createTable tableName="transactions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="till_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="DECIMAL(12,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="float_change" type="DECIMAL(12,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cash_change" type="DECIMAL(12,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="voided" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="BIGINT"/>
+            <column name="voided_at" type="TIMESTAMP"/>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="transactions"
+                baseColumnNames="till_id"
+                constraintName="fk_transaction_till"
+                referencedTableName="tills"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="transactions"
+                baseColumnNames="function_id"
+                constraintName="fk_transaction_function"
+                referencedTableName="till_functions"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <!-- Float Purchases -->
+    <changeSet id="create-float-top-ups-1" author="alphonce">
+        <createTable tableName="float_top_ups">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="till_id" type="BIGINT"/>
+            <column name="amount" type="DECIMAL(12,2)"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="voided" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="BIGINT"/>
+            <column name="voided_at" type="TIMESTAMP"/>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="float_top_ups"
+                baseColumnNames="till_id"
+                constraintName="fk_float_top_ups_till"
+                referencedTableName="tills"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <!-- Cashouts -->
+    <changeSet id="create-cashouts-1" author="alphonce">
+        <createTable tableName="cash_outs">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="till_id" type="BIGINT"/>
+            <column name="amount" type="DECIMAL(12,2)"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="voided" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="BIGINT"/>
+            <column name="voided_at" type="TIMESTAMP"/>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="cash_outs"
+                baseColumnNames="till_id"
+                constraintName="fk_cash_out_till"
+                referencedTableName="tills"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

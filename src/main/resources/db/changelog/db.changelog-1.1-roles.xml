@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="roles-1" author="alphonce">
+        <createTable tableName="roles">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(120)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="LONGTEXT"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="voided" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="BIGINT"/>
+            <column name="voided_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <!-- Foreign key to users.id -->
+        <addForeignKeyConstraint
+                baseTableName="roles"
+                baseColumnNames="created_by"
+                constraintName="fk_roles_created_by"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+
+        <!-- Foreign key to roles.id -->
+        <addForeignKeyConstraint
+                baseTableName="roles"
+                baseColumnNames="updated_by"
+                constraintName="fk_roles_updated_by"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+
+        <!-- Foreign key to users.id for created_by -->
+        <addForeignKeyConstraint
+                baseTableName="roles"
+                baseColumnNames="voided_by"
+                constraintName="fk_roles_voided_by"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="insert-roles-1" author="alphonce">
+        <insert tableName="roles">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="Administrator"/>
+            <column name="description" value="A role will all permissions"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="created_at" valueDate="2025-06-23T14:00:00"/>
+            <column name="voided" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="users-1" author="alphonce">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(120)">
+            <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="surname" type="VARCHAR(120)">
+            <constraints nullable="false"/>
+            </column>
+            <column name="othernames" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email_address" type="VARCHAR(120)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="contact_number" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="voided" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="BIGINT"/>
+            <column name="voided_at" type="TIMESTAMP"/>
+        </createTable>
+
+    </changeSet>
+
+    <changeSet id="insert-users-1" author="alphonce">
+        <insert tableName="users">
+            <column name="id" valueNumeric="1"/>
+            <column name="username" value="admin"/>
+            <column name="surname" value="System"/>
+            <column name="othernames" value="Administrator"/>
+            <column name="email_address" value="admin@example.com"/>
+            <column name="contact_number" value="+26650000000"/>
+            <column name="created_by" valueNumeric="1"/>
+            <column name="created_at" valueDate="2025-06-23T14:00:00"/>
+            <column name="voided" valueNumeric="0"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
