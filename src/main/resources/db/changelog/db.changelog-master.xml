@@ -12,5 +12,6 @@
     <include file="db/changelog/db.changelog-1.4-user-authentication.xml"/>
     <include file="db/changelog/db.changelog-1.5-role-permissions.xml" />
     <include file="db/changelog/db.changelog-1.6-tili.xml" />
+    <include file="db/changelog/db.changelog-1.7-global-config.xml" />
 
 </databaseChangeLog>

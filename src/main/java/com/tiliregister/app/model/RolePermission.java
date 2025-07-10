@@ -23,7 +23,7 @@ public class RolePermission {
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     User createdBy;
 
     @Column(name = "created_at")

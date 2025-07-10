@@ -13,7 +13,8 @@ public class TillFunctionMap {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "tili_id", nullable = false)
+    @JoinColumn(name = "till_id", nullable = false)
+    @JsonSerialize(using = TillSerializer.class)
     private Till till;
 
     @ManyToOne
@@ -22,7 +23,7 @@ public class TillFunctionMap {
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User createdBy;
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")

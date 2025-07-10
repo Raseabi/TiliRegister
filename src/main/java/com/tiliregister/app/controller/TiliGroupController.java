@@ -4,6 +4,7 @@ import com.tiliregister.app.model.TiliGroup;
 import com.tiliregister.app.service.TiliGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ public class TiliGroupController {
         this.tiliGroupService = tiliGroupService;
     }
 
+    @PreAuthorize("hasAuthority('tili:group:create')")
     @PostMapping
     public ResponseEntity<TiliGroup> createTiliGroup(@RequestBody TiliGroup tiliGroup, Authentication authentication) {
 
@@ -28,18 +30,21 @@ public class TiliGroupController {
         return ResponseEntity.ok(savedTiliGroup);
     }
 
+    @PreAuthorize("hasAuthority('tili:group:view')")
     @GetMapping
     public ResponseEntity<List<TiliGroup>> getAllTiliGroups() {
         List<TiliGroup> tiliGroups = tiliGroupService.getAllTiliGroups();
         return ResponseEntity.ok(tiliGroups);
     }
 
+    @PreAuthorize("hasAuthority('tili:group:view')")
     @GetMapping("/{id}")
     public ResponseEntity<TiliGroup> getTiliGroup(@PathVariable Long id) {
         TiliGroup tiliGroup = tiliGroupService.getTiliGroupById(id);
         return ResponseEntity.ok(tiliGroup);
     }
 
+    @PreAuthorize("hasAuthority('tili:group:view')")
     @GetMapping("/active")
     public ResponseEntity<List<TiliGroup>> getActiveTiliGroups() {
 
@@ -47,12 +52,14 @@ public class TiliGroupController {
         return ResponseEntity.ok(tiliGroups);
     }
 
+    @PreAuthorize("hasAuthority('tili:group:view')")
     @GetMapping("/non-active")
     public ResponseEntity<List<TiliGroup>> getNonActiveTiliGroups() {
         List<TiliGroup> tiliGroups = tiliGroupService.getNonActiveTiliGroups();
         return ResponseEntity.ok(tiliGroups);
     }
 
+    @PreAuthorize("hasAuthority('tili:group:edit')")
     @PutMapping("/{id}")
     public ResponseEntity<TiliGroup> updateTiliGroup(@PathVariable Long id, @RequestBody TiliGroup tiliGroup, Authentication authentication) {
         String username = authentication.getName();
@@ -61,6 +68,7 @@ public class TiliGroupController {
 
     }
 
+    @PreAuthorize("hasAuthority('tili:group:delete')")
     @PutMapping("/{id}/void")
     public ResponseEntity<TiliGroup> voidTiliGroup(@PathVariable Long id, Authentication authentication) {
         String username = authentication.getName();
@@ -69,6 +77,7 @@ public class TiliGroupController {
 
     }
 
+    @PreAuthorize("hasAuthority('tili:group:delete')")
     @PutMapping("/{id}/restore")
     public ResponseEntity<TiliGroup> restoreTiliGroup(@PathVariable Long id, Authentication authentication) {
         String username = authentication.getName();

@@ -54,4 +54,12 @@
                 constraintName="uk_role_permission"/>
     </changeSet>
 
+    <changeSet id="insert-role-permissions-for-role-1" author="alphonce">
+        <sql>
+            INSERT INTO role_permissions (role_id, permission_id, created_by, created_at)
+            SELECT 1, p.id, 1, NOW()
+            FROM permissions p;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

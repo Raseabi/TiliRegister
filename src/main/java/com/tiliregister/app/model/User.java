@@ -1,13 +1,12 @@
 package com.tiliregister.app.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -34,14 +33,14 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<UserRole> userRoles = new ArrayList<>();
+    private Set<UserRole> userRoles = new HashSet<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserAuthentication userAuthentication;
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User createdBy;
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -49,7 +48,7 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "updated_by", nullable = true)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User updatedBy;
 
     @Column(name = "updated_at", nullable = true, columnDefinition = "TIMESTAMP")
@@ -60,7 +59,7 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "voided_by", nullable = true)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User voidedBy;
 
     @Column(name = "voided_at", nullable = true, columnDefinition = "TIMESTAMP")
@@ -114,11 +113,11 @@ public class User {
         this.contactNumber = contactNumber;
     }
 
-    public List<UserRole> getUserRoles() {
+    public Set<UserRole> getUserRoles() {
         return userRoles;
     }
 
-    public void setUserRoles(List<UserRole> userRoles) {
+    public void setUserRoles(Set<UserRole> userRoles) {
         this.userRoles = userRoles;
     }
 

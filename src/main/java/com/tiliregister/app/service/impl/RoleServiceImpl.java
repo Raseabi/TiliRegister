@@ -95,7 +95,7 @@ public class RoleServiceImpl implements RoleService {
         User voidedBy = userService.getUserByUsername(voidedByUsername);
         Role role = roleDao.findById(id);
 
-        if (role == null || role.getVoided() == 1 || voidedBy == null || voidedBy.getVoided() == 1) {
+        if (role == null || voidedBy == null || voidedBy.getVoided() == 1) {
             throw new EntityNotFoundException("Role or admin not found");
         }
 

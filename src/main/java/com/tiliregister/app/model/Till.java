@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tills")
@@ -15,6 +17,7 @@ public class Till {
 
     @ManyToOne
     @JoinColumn(name = "tili_group_id", nullable = false)
+    @JsonSerialize(using = TiliGroupSerializer.class)
     private TiliGroup tiliGroup;
 
     @Column(nullable = false)
@@ -29,9 +32,18 @@ public class Till {
     @Column(name = "current_cash_in_hand", nullable = false)
     private BigDecimal currentCashInHand;
 
+    @OneToMany(mappedBy = "till", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CashOut> cashOuts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "till", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FloatTopUp> floatTopUps = new ArrayList<>();
+
+    @OneToMany(mappedBy = "till", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TillFunctionMap> tillFunctionMaps = new ArrayList<>();
+
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User createdBy;
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -39,7 +51,7 @@ public class Till {
 
     @ManyToOne
     @JoinColumn(name = "updated_by", nullable = true)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User updatedBy;
 
     @Column(name = "updated_at", nullable = true, columnDefinition = "TIMESTAMP")
@@ -50,7 +62,7 @@ public class Till {
 
     @ManyToOne
     @JoinColumn(name = "voided_by", nullable = true)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User voidedBy;
 
     @Column(name = "voided_at", nullable = true, columnDefinition = "TIMESTAMP")
@@ -102,6 +114,30 @@ public class Till {
 
     public void setCurrentCashInHand(BigDecimal currentCashInHand) {
         this.currentCashInHand = currentCashInHand;
+    }
+
+    public List<CashOut> getCashOuts() {
+        return cashOuts;
+    }
+
+    public void setCashOuts(List<CashOut> cashOuts) {
+        this.cashOuts = cashOuts;
+    }
+
+    public List<FloatTopUp> getFloatTopUps() {
+        return floatTopUps;
+    }
+
+    public void setFloatTopUps(List<FloatTopUp> floatTopUps) {
+        this.floatTopUps = floatTopUps;
+    }
+
+    public List<TillFunctionMap> getTillFunctionMaps() {
+        return tillFunctionMaps;
+    }
+
+    public void setTillFunctionMaps(List<TillFunctionMap> tillFunctionMaps) {
+        this.tillFunctionMaps = tillFunctionMaps;
     }
 
     public User getCreatedBy() {
@@ -169,6 +205,9 @@ public class Till {
                 ", description='" + description + '\'' +
                 ", currentFloat=" + currentFloat +
                 ", currentCashInHand=" + currentCashInHand +
+                ", cashOuts=" + cashOuts +
+                ", floatTopUps=" + floatTopUps +
+                ", tillFunctionMaps=" + tillFunctionMaps +
                 ", createdBy=" + createdBy +
                 ", createdAt=" + createdAt +
                 ", updatedBy=" + updatedBy +

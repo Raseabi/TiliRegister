@@ -78,6 +78,12 @@ public class TillFunctionServiceImpl implements TillFunctionService {
             throw new IllegalArgumentException("Function already exists");
         }
 
+        System.out.println("Cash Change Direction **** = " + tillFunction.getCashChangeDirection());
+
+        if (tillFunction.getCashChangeDirection() == null) {
+            throw new IllegalArgumentException("Cash Change Direction must not be null");
+        }
+
         updatedTillFunction.setName(tillFunction.getName());
         updatedTillFunction.setFloatChangeDirection(tillFunction.getFloatChangeDirection());
         updatedTillFunction.setCashChangeDirection(tillFunction.getCashChangeDirection());
@@ -95,10 +101,9 @@ public class TillFunctionServiceImpl implements TillFunctionService {
         TillFunction voidedTillFunction = tillFunctionDao.findById(id);
         User voidedBy = userService.getUserByUsername(voidByUsername);
 
-        if(voidedTillFunction == null || voidedTillFunction.getVoided() == 1 || voidedBy == null || voidedBy.getVoided() == 1){
+        if(voidedTillFunction == null || voidedBy == null || voidedBy.getVoided() == 1){
             throw  new EntityNotFoundException("Function or Admin not found");
         }
-
 
         voidedTillFunction.setVoided(voidStatus);
         voidedTillFunction.setVoidedBy(voidedBy);

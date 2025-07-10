@@ -47,7 +47,7 @@ public class TillFunctionDaoImpl implements TillFunctionDao {
     @Override
     public List<TillFunction> findByVoidStatus(List<Integer> voidStatus) {
         return entityManager.createQuery("SELECT tf FROM TillFunction tf WHERE voided IN :voidStatus", TillFunction.class)
-                .setParameter("voided", voidStatus)
+                .setParameter("voidStatus", voidStatus)
                 .getResultList();
     }
 

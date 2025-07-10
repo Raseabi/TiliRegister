@@ -104,4 +104,9 @@ public class TillFunctionMapServiceImpl implements TillFunctionMapService {
        }
        return true;
     }
+
+    @Override
+    public boolean deleteTillFunctionById(Long id) {
+        return tillFunctionMapDao.deleteById(id);
+    }
 }

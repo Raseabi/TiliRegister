@@ -4,6 +4,8 @@ import com.tiliregister.app.dao.UserDao;
 import com.tiliregister.app.model.Role;
 import com.tiliregister.app.model.User;
 import jakarta.persistence.TypedQuery;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.EntityManager;
@@ -34,13 +36,19 @@ public class UserDaoImpl implements UserDao {
         return entityManager.find(User.class, id);
     }
 
+    @Override
     public User findByUsername(String username) {
-        List<User> query = entityManager.createQuery(
-                        "SELECT u FROM User u WHERE u.username = :username", User.class)
+        return entityManager.createQuery(
+                        "SELECT DISTINCT u FROM User u " +
+                                "LEFT JOIN FETCH u.userRoles ur " +
+                                "LEFT JOIN FETCH ur.role r " +
+                                "LEFT JOIN FETCH r.rolePermissions rp " +
+                                "LEFT JOIN FETCH rp.permission p " +
+                                "WHERE u.username = :username", User.class)
                 .setParameter("username", username)
                 .setMaxResults(1)
-                .getResultList();
-        return query.isEmpty() ? null : query.get(0);
+                .getResultList()
+                .stream().findFirst().orElse(null);
     }
 
     @Override

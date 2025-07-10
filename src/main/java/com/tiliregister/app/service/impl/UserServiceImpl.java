@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
         user.setCreatedAt(LocalDateTime.now());
 
         // Setup authentication
-        String rawPassword = PasswordGenerator.generatePassword(6);
+        String rawPassword = PasswordGenerator.generatePassword(8);
 
         if (rawPassword.isEmpty()) {
             throw new IllegalArgumentException("Password is required");
@@ -122,8 +122,8 @@ public class UserServiceImpl implements UserService {
         User existingUser = userDao.findById(id);
         User updatedBy = userDao.findByUsername(updatedByUsername);
 
-        if (existingUser == null || updatedBy == null || updatedBy.getVoided() == 1) {
-            throw new EntityNotFoundException("User or admin not found");
+        if (existingUser == null || existingUser.getVoided() == 1 || updatedBy == null || updatedBy.getVoided() == 1) {
+            throw new EntityNotFoundException("User (to updated) or Admin not found");
         }
         if (isEmailUnique(user.getEmailAddress(), id)) {
             throw new IllegalArgumentException("Email address already exists");

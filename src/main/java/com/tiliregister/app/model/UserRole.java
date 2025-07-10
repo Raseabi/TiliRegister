@@ -1,6 +1,5 @@
 package com.tiliregister.app.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -25,7 +24,7 @@ public class UserRole {
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User createdBy;
 
     @Column(name = "created_at", nullable = false)

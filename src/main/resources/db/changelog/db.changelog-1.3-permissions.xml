@@ -19,155 +19,155 @@
 
     <changeSet id="insert-permissions-1" author="alphonce">
         <insert tableName="permissions">
-            <column name="name" value="transaction_view"/>
+            <column name="name" value="transaction:view"/>
             <column name="description" value="Allows viewing transactions"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="transaction_create"/>
+            <column name="name" value="transaction:create"/>
             <column name="description" value="Allows creating new transactions"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="transaction_edit"/>
+            <column name="name" value="transaction:edit"/>
             <column name="description" value="Allows editing existing transactions"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="transaction_delete"/>
+            <column name="name" value="transaction:delete"/>
             <column name="description" value="Allows deleting transactions"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="float_view"/>
+            <column name="name" value="float:view"/>
             <column name="description" value="Allows viewing floats"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="float_create"/>
+            <column name="name" value="float:create"/>
             <column name="description" value="Allows creating new floats"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="float_edit"/>
+            <column name="name" value="float:edit"/>
             <column name="description" value="Allows editing existing floats"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="float_delete"/>
+            <column name="name" value="float:delete"/>
             <column name="description" value="Allows deleting floats"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="float_transaction_view"/>
-            <column name="description" value="Allows viewing float transactions"/>
+            <column name="name" value="cashout:view"/>
+            <column name="description" value="Allows viewing cash out transactions"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="float_transaction_create"/>
-            <column name="description" value="Allows creating new float transactions"/>
+            <column name="name" value="cashout:create"/>
+            <column name="description" value="Allows creating cash out transactions"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="float_transaction_edit"/>
-            <column name="description" value="Allows editing existing float transactions"/>
+            <column name="name" value="cashout:edit"/>
+            <column name="description" value="Allows editing cash out transactions"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="float_transaction_delete"/>
-            <column name="description" value="Allows deleting float transactions"/>
+            <column name="name" value="cashout:delete"/>
+            <column name="description" value="Allows deleting cash out transactions"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="register_view"/>
-            <column name="description" value="Allows viewing register"/>
+            <column name="name" value="tili:group:view"/>
+            <column name="description" value="Allows viewing tili groups"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="register_create"/>
-            <column name="description" value="Allows creating new register"/>
+            <column name="name" value="tili:group:create"/>
+            <column name="description" value="Allows creating new tili groups"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="register_edit"/>
-            <column name="description" value="Allows editing existing register"/>
+            <column name="name" value="tili:group:edit"/>
+            <column name="description" value="Allows editing existing tili groups"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="register_delete"/>
-            <column name="description" value="Allows deleting register"/>
+            <column name="name" value="tili:group:delete"/>
+            <column name="description" value="Allows deleting tili groups"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="till_view"/>
+            <column name="name" value="till:view"/>
             <column name="description" value="Allows viewing till"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="till_create"/>
+            <column name="name" value="till:create"/>
             <column name="description" value="Allows creating new till"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="till_edit"/>
+            <column name="name" value="till:edit"/>
             <column name="description" value="Allows editing existing till"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="till_delete"/>
+            <column name="name" value="till:delete"/>
             <column name="description" value="Allows deleting till"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="activity_log_view"/>
+            <column name="name" value="till:function:view"/>
+            <column name="description" value="Allows viewing till functions"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="name" value="till:function:create"/>
+            <column name="description" value="Allows creating till functions"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="name" value="till:function:edit"/>
+            <column name="description" value="Allows editing till functions"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="name" value="till:function:delete"/>
+            <column name="description" value="Allows deleting till functions"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="name" value="activity:log:view"/>
             <column name="description" value="Allows viewing activity log"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="reports_view"/>
+            <column name="name" value="reports:view"/>
             <column name="description" value="Allows viewing reports"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="roles_view"/>
+            <column name="name" value="role:view"/>
             <column name="description" value="Allows viewing roles"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="roles_create"/>
+            <column name="name" value="role:create"/>
             <column name="description" value="Allows creating new roles"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="roles_edit"/>
+            <column name="name" value="role:edit"/>
             <column name="description" value="Allows editing existing roles"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="roles_delete"/>
+            <column name="name" value="role:delete"/>
             <column name="description" value="Allows deleting roles"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="permissions_view"/>
-            <column name="description" value="Allows viewing permissions"/>
-        </insert>
-        <insert tableName="permissions">
-            <column name="name" value="permissions_create"/>
-            <column name="description" value="Allows creating new permissions"/>
-        </insert>
-        <insert tableName="permissions">
-            <column name="name" value="permissions_edit"/>
-            <column name="description" value="Allows editing existing permissions"/>
-        </insert>
-        <insert tableName="permissions">
-            <column name="name" value="permissions_delete"/>
-            <column name="description" value="Allows deleting permissions"/>
-        </insert>
-        <insert tableName="permissions">
-            <column name="name" value="users_account_view"/>
+            <column name="name" value="user:view"/>
             <column name="description" value="Allows viewing users profiles"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="users_account_create"/>
+            <column name="name" value="user:create"/>
             <column name="description" value="Allows creating new user profiles"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="users_account_edit"/>
+            <column name="name" value="user:edit"/>
             <column name="description" value="Allows editing existing users profiles"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="users_account_delete"/>
+            <column name="name" value="user:delete"/>
             <column name="description" value="Allows deleting users profiles"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="application_settings_view"/>
+            <column name="name" value="setting:view"/>
             <column name="description" value="Allows viewing settings"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="application_settings_create"/>
+            <column name="name" value="setting:create"/>
             <column name="description" value="Allows creating new settings"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="application_settings_edit"/>
+            <column name="name" value="setting:edit"/>
             <column name="description" value="Allows editing existing settings"/>
         </insert>
         <insert tableName="permissions">
-            <column name="name" value="application_settings_delete"/>
+            <column name="name" value="setting:delete"/>
             <column name="description" value="Allows deleting settings"/>
         </insert>
     </changeSet>
