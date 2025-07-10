@@ -1,9 +1,7 @@
 package com.tiliregister.app.service.impl;
 
 import com.tiliregister.app.dao.TransactionDao;
-import com.tiliregister.app.model.TillFunction;
-import com.tiliregister.app.model.Transaction;
-import com.tiliregister.app.model.User;
+import com.tiliregister.app.model.*;
 import com.tiliregister.app.service.TillFunctionService;
 import com.tiliregister.app.service.TillService;
 import com.tiliregister.app.service.TransactionService;
@@ -76,16 +74,47 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transaction updateTransaction(Long id, Transaction transaction, String updatedByUsername) {
+    public List<Transaction> getTransactionsByTillId(Long tillId) {
+        return transactionDao.findByTillId(tillId);
+    }
+
+    @Override
+    public List<Transaction> getTransactionsByTillName(String tillName) {
+        return transactionDao.findByTillName(tillName);
+    }
+
+    @Override
+    public List<Transaction> getTransactionsByFunctionId(Long functionId) {
+        return transactionDao.findByFunctionId(functionId);
+    }
+
+    @Override
+    public List<Transaction> getTransactionsByFunctionName(String functionName) {
+        return transactionDao.findByFunctionName(functionName);
+    }
+
+    @Override
+    public Transaction updateTransactionOnly(Long id, Transaction transaction, String updatedByUsername) {
         Transaction updatedTransaction = transactionDao.findById(id);
         User updatedBy = userService.getUserByUsername(updatedByUsername);
 
         if (updatedTransaction == null || updatedTransaction.getVoided() == 1 || updatedBy == null || updatedBy.getVoided() == 1) {
             throw new EntityNotFoundException("Transaction or Admin not found");
         }
+        Till till = tillService.getTillById(transaction.getTill().getId());
+        TillFunction tillFunction = tillFunctionService.getTillFunctionById(transaction.getTillFunction().getId());
+
+        String floatDirection = tillFunction.getFloatChangeDirection().toString();
+        String cashDirection = tillFunction.getCashChangeDirection().toString();
+
+        BigDecimal floatChange = transactionChangeDirection(transaction.getAmount(), floatDirection);
+        BigDecimal cashChange = transactionChangeDirection(transaction.getAmount(), cashDirection);
+
+        updatedTransaction.setTill(till);
+        updatedTransaction.setTillFunction(tillFunction);
         updatedTransaction.setAmount(transaction.getAmount());
-        updatedTransaction.setFloatChange(transaction.getFloatChange());
-        updatedTransaction.setCashChange(transaction.getCashChange());
+        updatedTransaction.setFloatChange(floatChange);
+        updatedTransaction.setCashChange(cashChange);
         updatedTransaction.setUpdatedBy(updatedBy);
         updatedTransaction.setUpdatedAt(LocalDateTime.now());
 
@@ -93,11 +122,50 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional
+    public Transaction updateTransactionWithReversal(Long id, Transaction transaction, String updatedByUsername) {
+        Transaction existingTransaction = transactionDao.findById(id);
+        User updatedBy = userService.getUserByUsername(updatedByUsername);
+
+        if (existingTransaction == null || existingTransaction.getVoided() == 1 || updatedBy == null || updatedBy.getVoided() == 1) {
+            throw new EntityNotFoundException("Transaction or Admin not found");
+        }
+
+        Transaction reversal = new Transaction();
+        reversal.setAmount(existingTransaction.getAmount());
+        reversal.setTill(existingTransaction.getTill());
+        reversal.setTillFunction(existingTransaction.getTillFunction());
+        processTransactionReversalEffects(reversal, tillService);
+
+        Till newTill = tillService.getTillById(transaction.getTill().getId());
+        TillFunction newFunction = tillFunctionService.getTillFunctionById(transaction.getTillFunction().getId());
+
+        transaction.setTill(newTill);
+        transaction.setTillFunction(newFunction);
+
+        if (!isTransactionValid(transaction, tillService)) {
+            throw new IllegalArgumentException("Transaction would result in invalid float or cash values.");
+        }
+
+        processTransactionEffects(transaction, tillService);
+
+        existingTransaction.setAmount(transaction.getAmount());
+        existingTransaction.setTill(transaction.getTill());
+        existingTransaction.setTillFunction(transaction.getTillFunction());
+        existingTransaction.setFloatChange(transaction.getFloatChange());
+        existingTransaction.setCashChange(transaction.getCashChange());
+        existingTransaction.setUpdatedBy(updatedBy);
+        existingTransaction.setUpdatedAt(LocalDateTime.now());
+
+        return transactionDao.save(existingTransaction);
+    }
+
+    @Override
     public Transaction voidTransaction(Long id, int voidStatus, String voidedByUsername) {
         Transaction voidedTransaction = transactionDao.findById(id);
         User voidedBy = userService.getUserByUsername(voidedByUsername);
 
-        if (voidedTransaction == null || voidedTransaction.getVoided() == 1 || voidedBy == null || voidedBy.getVoided() == 1) {
+        if (voidedTransaction == null || voidedBy == null || voidedBy.getVoided() == 1) {
             throw new EntityNotFoundException("Transaction or Admin not found");
         }
         voidedTransaction.setVoided(voidStatus);
@@ -108,8 +176,10 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional
     public boolean isTransactionValid(Transaction transaction, TillService tillService) {
-        TillFunction function = transaction.getTillFunction();
+
+        TillFunction function = tillFunctionService.getTillFunctionById(transaction.getTillFunction().getId());
         Long tillId = transaction.getTill().getId();
         BigDecimal amount = transaction.getAmount();
 
@@ -132,9 +202,10 @@ public class TransactionServiceImpl implements TransactionService {
 
         return true;
     }
+
     @Override
     public void processTransactionEffects(Transaction transaction, TillService tillService) {
-        TillFunction function = transaction.getTillFunction();
+        TillFunction function = tillFunctionService.getTillFunctionById(transaction.getTillFunction().getId());
         Long tillId = transaction.getTill().getId();
         BigDecimal amount = transaction.getAmount();
 
@@ -142,19 +213,59 @@ public class TransactionServiceImpl implements TransactionService {
         String cashDirection = function.getCashChangeDirection().toString().toLowerCase();
 
         // Apply float change
-        if (floatDirection.equals("in")) {
-            tillService.adjustTillFloat(tillId, amount, "+");
-        } else if (floatDirection.equals("out")) {
-            tillService.adjustTillFloat(tillId, amount, "-");
+        switch (floatDirection) {
+            case "in" -> {
+                tillService.adjustTillFloat(tillId, amount, "+");
+                transaction.setFloatChange(transaction.getAmount());
+            }
+            case "out" -> {
+                tillService.adjustTillFloat(tillId, amount, "-");
+                transaction.setFloatChange(transaction.getAmount().negate());
+            }
+            case "none" -> transaction.setFloatChange(BigDecimal.ZERO);
+            default -> throw new IllegalArgumentException("Invalid float change direction: " + floatDirection);
         }
 
         // Apply cash change
-        if (cashDirection.equals("in")) {
-            tillService.adjustTillCashInHand(tillId, amount, "+");
-        } else if (cashDirection.equals("out")) {
-            tillService.adjustTillCashInHand(tillId, amount, "-");
+        switch (cashDirection) {
+            case "in" -> {
+                tillService.adjustTillCashInHand(tillId, amount, "+");
+                transaction.setCashChange(transaction.getAmount());
+            }
+            case "out" -> {
+                tillService.adjustTillCashInHand(tillId, amount, "-");
+                transaction.setCashChange(transaction.getAmount().negate());
+            }
+            case "none" -> transaction.setCashChange(BigDecimal.ZERO);
+            default -> throw new IllegalArgumentException("Invalid cash change direction: " + cashDirection);
         }
     }
 
+    @Override
+    public void processTransactionReversalEffects(Transaction transaction, TillService tillService) {
+        TillFunction function = transaction.getTillFunction();
+        Long tillId = transaction.getTill().getId();
+        BigDecimal amount = transaction.getAmount();
 
+        if (function.getFloatChangeDirection() == TillFunctionChangeDirection.in) {
+            tillService.adjustTillFloat(tillId, amount, "-");
+        } else if (function.getFloatChangeDirection() == TillFunctionChangeDirection.out) {
+            tillService.adjustTillFloat(tillId, amount, "+");
+        }
+
+        if (function.getCashChangeDirection() == TillFunctionChangeDirection.in) {
+            tillService.adjustTillCashInHand(tillId, amount, "-");
+        } else if (function.getCashChangeDirection() == TillFunctionChangeDirection.out) {
+            tillService.adjustTillCashInHand(tillId, amount, "+");
+        }
+    }
+
+    private BigDecimal transactionChangeDirection(BigDecimal amount, String changeDirection) {
+        return switch (changeDirection.toLowerCase()) {
+            case "in" -> amount;
+            case "out" -> amount.negate();
+            case "none" -> BigDecimal.ZERO;
+            default -> throw new IllegalArgumentException("Invalid change direction: " + changeDirection);
+        };
+    }
 }

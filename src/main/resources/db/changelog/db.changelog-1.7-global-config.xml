@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="create-global-config-table" author="alphonce">
+        <createTable tableName="global_config">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="config_key" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="value" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="changed_by" type="BIGINT"/>
+            <column name="changed_at" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="insert-global-config-defaults" author="alphonce">
+        <insert tableName="global_config">
+            <column name="config_key" value="maxLoginAttemptsAllowed"/>
+            <column name="value" value="5"/>
+            <column name="description" value="Maximum login attempts allowed before lock"/>
+        </insert>
+        <insert tableName="global_config">
+            <column name="config_key" value="maxResetAttemptsAllowed"/>
+            <column name="value" value="3"/>
+            <column name="description" value="Maximum password reset attempts per day"/>
+        </insert>
+        <insert tableName="global_config">
+            <column name="config_key" value="passwordExpiryDays"/>
+            <column name="value" value="0"/>
+            <column name="description" value="Maximum allowed days to use a password"/>
+        </insert>
+    </changeSet>
+
+
+</databaseChangeLog>

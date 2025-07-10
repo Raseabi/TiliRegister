@@ -5,6 +5,7 @@ import com.tiliregister.app.model.RolePermissionRequest;
 import com.tiliregister.app.service.RolePermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class RolePermissionController {
         this.rolePermissionService = rolePermissionService;
     }
 
+    //@PreAuthorize("hasAuthority('role:create')")
     @PostMapping
     public ResponseEntity<String> createRolePermission(
             @RequestBody RolePermissionRequest request,
@@ -44,25 +46,29 @@ public class RolePermissionController {
         return ResponseEntity.ok("Permissions assigned successfully");
     }
 
+    @PreAuthorize("hasAuthority('role:view')")
     @GetMapping("/{id}")
     public ResponseEntity<RolePermission> getRolePermission(@PathVariable Long id) {
         RolePermission rolePermission = rolePermissionService.getRolePermissionById(id);
         return ResponseEntity.ok(rolePermission);
     }
 
+    @PreAuthorize("hasAuthority('role:view')")
     @GetMapping("/role/{id}")
     public ResponseEntity<List<RolePermission>> getRolePermissionsByRoleId(@PathVariable("id") Long roleId) {
         List<RolePermission> rolePermissions = rolePermissionService.getRolePermissionsByRoleId(roleId);
         return ResponseEntity.ok(rolePermissions);
     }
 
+    @PreAuthorize("hasAuthority('role:delete')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRolePermission(@PathVariable Long id) {
         boolean success = rolePermissionService.deleteRolePermissionById(id);
         return success ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
     }
 
-    @DeleteMapping("/roles/{roleId}/permissions")
+    @PreAuthorize("hasAuthority('role:delete')")
+    @DeleteMapping("/role/{roleId}/permissions")
     public ResponseEntity<?> removePermissionsFromRole(
             @PathVariable Long roleId,
             @RequestParam Set<Long> permissionIds) {

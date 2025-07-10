@@ -13,4 +13,5 @@ public interface TillFunctionMapService {
     List<TillFunctionMap> getTillFunctionByFunctionId(Long functionId);
     boolean assignFunctionsToTill(Long tillId, Set<Long> functionIds, String assignedByUsername);
     boolean removeFunctionsFromTill(Long tillId, Set<Long> functionIds);
+    boolean deleteTillFunctionById(Long id);
 }

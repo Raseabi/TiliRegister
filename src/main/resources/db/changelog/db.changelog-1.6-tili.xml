@@ -6,7 +6,7 @@
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
     <!-- Tili group -->
-    <changeSet id="create-tili_groups-1" author="alphonce">
+    <changeSet id="create-tili-groups-1" author="alphonce">
         <createTable tableName="tili_groups">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>

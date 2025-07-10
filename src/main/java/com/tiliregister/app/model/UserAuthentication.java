@@ -14,7 +14,7 @@ public class UserAuthentication {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User user;
 
     @Column(nullable = false)

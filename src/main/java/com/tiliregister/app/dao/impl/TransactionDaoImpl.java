@@ -33,8 +33,15 @@ public class TransactionDaoImpl implements TransactionDao {
 
     @Override
     public List<Transaction> findByTillId(Long tillId) {
-        return entityManager.createQuery("SELECT tx FROM Transaction tx WHERE tx.tili.id = :tillId", Transaction.class)
+        return entityManager.createQuery("SELECT tx FROM Transaction tx WHERE tx.till.id = :tillId", Transaction.class)
                 .setParameter("tillId", tillId)
+                .getResultList();
+    }
+
+    @Override
+    public List<Transaction> findByTillName(String tillName) {
+        return entityManager.createQuery("SELECT tx FROM Transaction tx WHERE tx.till.name = :tillName", Transaction.class)
+                .setParameter("tillName", tillName)
                 .getResultList();
     }
 
@@ -42,6 +49,13 @@ public class TransactionDaoImpl implements TransactionDao {
     public List<Transaction> findByFunctionId(Long functionId) {
         return entityManager.createQuery("SELECT tx FROM Transaction tx WHERE tx.tillFunction.id = :functionId", Transaction.class)
                 .setParameter("functionId", functionId)
+                .getResultList();
+    }
+
+    @Override
+    public List<Transaction> findByFunctionName(String functionName) {
+        return entityManager.createQuery("SELECT tx FROM Transaction tx WHERE tx.tillFunction.name = :functionName", Transaction.class)
+                .setParameter("functionName", functionName)
                 .getResultList();
     }
 

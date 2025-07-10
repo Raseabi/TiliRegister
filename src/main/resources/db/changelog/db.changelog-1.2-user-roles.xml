@@ -49,4 +49,10 @@
                 referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="insert-user-roles-for-user-1" author="alphonce">
+        <sql>
+            INSERT INTO user_roles (user_id, role_id, created_by, created_at) VALUES (1, 1, 1, NOW());
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

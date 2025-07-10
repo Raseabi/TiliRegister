@@ -7,6 +7,7 @@ import com.tiliregister.app.model.User;
 import com.tiliregister.app.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,7 @@ public class RoleController {
         this.roleService = roleService;
     }
 
+    @PreAuthorize("hasAuthority('role:create')")
     @PostMapping
     public ResponseEntity<Role> createRole(@RequestBody Role role, Authentication authentication) {
         String username = authentication.getName();
@@ -31,18 +33,21 @@ public class RoleController {
 
     }
 
+    @PreAuthorize("hasAuthority('role:view')")
     @GetMapping("/{id}")
     public ResponseEntity<Role> getRole(@PathVariable Long id) {
         Role role = roleService.getRoleById(id);
         return ResponseEntity.ok(role);
     }
 
+    @PreAuthorize("hasAuthority('role:view')")
     @GetMapping
     public ResponseEntity<List<Role>> getAllRoles() {
         List<Role> roles = roleService.getAllRoles();
         return ResponseEntity.ok(roles);
     }
 
+    @PreAuthorize("hasAuthority('role:edit')")
     @PutMapping("/{id}")
     public ResponseEntity<Role> updateRole(@PathVariable Long id, @RequestBody Role role, Authentication authentication) {
         String username = authentication.getName();
@@ -50,6 +55,7 @@ public class RoleController {
         return ResponseEntity.ok(updatedRole);
     }
 
+    @PreAuthorize("hasAuthority('role:delete')")
     @PutMapping("/{id}/void")
     public ResponseEntity<Role> voidRole(@PathVariable Long id, Authentication authentication) {
         String username = authentication.getName(); // current logged-in username
@@ -57,6 +63,7 @@ public class RoleController {
         return ResponseEntity.ok(role);
     }
 
+    @PreAuthorize("hasAuthority('role:delete')")
     @PutMapping("/{id}/restore")
     public ResponseEntity<Role> restoreRole(@PathVariable Long id, Authentication authentication) {
         String username = authentication.getName(); // current logged-in username

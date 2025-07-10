@@ -1,5 +1,7 @@
 package com.tiliregister.app.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum TillFunctionChangeDirection {
-    IN, OUT, NONE
+    in, out, none
 }

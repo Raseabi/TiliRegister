@@ -5,6 +5,7 @@ import com.tiliregister.app.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
@@ -21,6 +22,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PreAuthorize("hasAuthority('user:create')")
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user, Authentication authentication) {
         String username = authentication.getName();
@@ -28,17 +30,20 @@ public class UserController {
         return ResponseEntity.ok(savedUser);
     }
 
+    @PreAuthorize("hasAuthority('user:view')")
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
+  @PreAuthorize("hasAuthority('user:view')")
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    @PreAuthorize("hasAuthority('user:edit')")
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user, Authentication authentication) {
             String updatedBy = authentication.getName();
@@ -47,6 +52,7 @@ public class UserController {
 
     }
 
+    @PreAuthorize("hasAuthority('user:delete')")
     @PutMapping("/{id}/void")
     public ResponseEntity<User> voidUser(@PathVariable Long id, Authentication authentication) {
         String voidedBy = authentication.getName(); // current logged-in username
@@ -54,11 +60,11 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @PreAuthorize("hasAuthority('user:delete')")
     @PutMapping("/{id}/restore")
     public ResponseEntity<User> restoreUser(@PathVariable Long id, Authentication authentication) {
         String restoredBy = authentication.getName(); // current logged-in username
         User user = userService.voidUser(id, 0, restoredBy);
         return ResponseEntity.ok(user);
     }
-
 }

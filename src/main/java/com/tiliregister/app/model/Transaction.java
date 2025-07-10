@@ -16,10 +16,12 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "till_id", nullable = false)
+    @JsonSerialize(using = TillSerializer.class)
     private Till till;
 
     @ManyToOne
     @JoinColumn(name = "function_id", nullable = false)
+    @JsonSerialize(using = TillFunctionSerializer.class)
     private TillFunction tillFunction;
 
     @Column(nullable = false)
@@ -33,7 +35,7 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User createdBy;
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -41,7 +43,7 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "updated_by", nullable = true)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User updatedBy;
 
     @Column(name = "updated_at", nullable = true, columnDefinition = "TIMESTAMP")
@@ -52,7 +54,7 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "voided_by", nullable = true)
-    @JsonSerialize(using = UserReferenceSerializer.class)
+    @JsonSerialize(using = UserSerializer.class)
     private User voidedBy;
 
     @Column(name = "voided_at", nullable = true, columnDefinition = "TIMESTAMP")

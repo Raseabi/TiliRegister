@@ -71,8 +71,8 @@ public class TiliGroupServiceImpl implements TiliGroupService {
         TiliGroup existingTiliGroup = tiliGroupDao.findById(id);
         User updatedBy = userDao.findByUsername(updatedByUsername);
 
-        if (existingTiliGroup == null || updatedBy == null || updatedBy.getVoided() == 1) {
-            throw new EntityNotFoundException("Tili Group or admin not found");
+        if (existingTiliGroup == null || existingTiliGroup.getVoided() == 1 || updatedBy == null || updatedBy.getVoided() == 1) {
+            throw new EntityNotFoundException("Tili Group or Admin not found");
         }
         //Check for duplicates
         if(isTiliGroupRegistered(tiliGroup.getName(), id)){//Tili name already exist

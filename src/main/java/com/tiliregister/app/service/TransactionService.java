@@ -10,8 +10,14 @@ public interface TransactionService {
     List<Transaction> getAllTransactions();
     List<Transaction> getActiveTransactions();
     List<Transaction> getNonActiveTransactions();
-    Transaction updateTransaction(Long id, Transaction transaction, String updatedByUsername);
+    List<Transaction> getTransactionsByTillId(Long tillId);
+    List<Transaction> getTransactionsByTillName(String tillName);
+    List<Transaction> getTransactionsByFunctionId(Long functionId);
+    List<Transaction> getTransactionsByFunctionName(String functionName);
+    Transaction updateTransactionOnly(Long id, Transaction transaction, String updatedByUsername);
+    Transaction updateTransactionWithReversal(Long id, Transaction transaction, String updatedByUsername);
     Transaction voidTransaction(Long id, int voidStatus, String voidedByUsername);
     boolean isTransactionValid(Transaction transaction, TillService tillService);
     void processTransactionEffects(Transaction transaction, TillService tillService);
+    void processTransactionReversalEffects(Transaction transaction, TillService tillService);
 }

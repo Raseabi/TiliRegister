@@ -1,9 +1,7 @@
 package com.tiliregister.app.service.impl;
 
 import com.tiliregister.app.dao.TillDao;
-import com.tiliregister.app.model.Till;
-import com.tiliregister.app.model.TillFunction;
-import com.tiliregister.app.model.User;
+import com.tiliregister.app.model.*;
 import com.tiliregister.app.service.TillFunctionService;
 import com.tiliregister.app.service.TillService;
 import com.tiliregister.app.service.UserService;
@@ -15,17 +13,20 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class TillServiceImpl implements TillService {
 
     private final TillDao tillDao;
     private final UserService userService;
+    private final TillFunctionService tillFunctionService;
 
     @Autowired
-    public TillServiceImpl(TillDao tillDao, UserService userService) {
+    public TillServiceImpl(TillDao tillDao, UserService userService, TillFunctionService tillFunctionService) {
         this.tillDao = tillDao;
         this.userService = userService;
+        this.tillFunctionService = tillFunctionService;
     }
 
     @Override
@@ -41,6 +42,41 @@ public class TillServiceImpl implements TillService {
         till.setCreatedAt(LocalDateTime.now());
 
         return tillDao.save(till);
+    }
+
+    @Override
+    @Transactional
+    public Till saveTillWithFunctions(TillRequest tillRequest, String createdByUsername) {
+        User createdBy = userService.getUserByUsername(createdByUsername);
+        if (createdBy == null || createdBy.getVoided() == 1) {
+            throw new EntityNotFoundException("Admin not found");
+        }
+        if (isTillUnique(tillRequest.getTill().getName(), null)) {
+            throw new IllegalArgumentException("Till already exist. Duplication denied");
+        }
+        if (tillRequest.getTillFunctionIds() == null || tillRequest.getTillFunctionIds().isEmpty()) {
+            throw new IllegalArgumentException("At least one till function must be provided.");
+        }
+        LocalDateTime createdAt = LocalDateTime.now();
+
+        Till newTill = tillRequest.getTill();
+        newTill.setCreatedBy(createdBy);
+        newTill.setCreatedAt(createdAt);
+
+        Set<Long> functionIds = tillRequest.getTillFunctionIds();
+
+
+        for (Long functionId : functionIds){
+            TillFunction tillFunction = tillFunctionService.getTillFunctionById(functionId);
+            TillFunctionMap tillFunctionMap = new TillFunctionMap();
+            tillFunctionMap.setTillFunction(tillFunction);
+            tillFunctionMap.setTill(newTill);
+            tillFunctionMap.setCreatedBy(createdBy);
+            tillFunctionMap.setCreatedAt(createdAt);
+
+            newTill.getTillFunctionMaps().add(tillFunctionMap);
+        }
+        return tillDao.save(newTill);
     }
 
     @Override
@@ -71,13 +107,14 @@ public class TillServiceImpl implements TillService {
     @Override
     public Till updateTill(Long id, Till till, String updatedByUsername) {
         User updatedBy = userService.getUserByUsername(updatedByUsername);
-        if (updatedBy == null || updatedBy.getVoided() == 1) {
-            throw new EntityNotFoundException("Admin not found");
+        Till updatedTill = tillDao.findById(id);
+        if (updatedTill == null || updatedTill.getVoided() == 1 || updatedBy == null || updatedBy.getVoided() == 1) {
+            throw new EntityNotFoundException("Till or Admin not found");
         }
         if (isTillUnique(till.getName(), id)) {
             throw new IllegalArgumentException("Till already exists. Duplication denied");
         }
-        Till updatedTill = tillDao.findById(id);
+
         updatedTill.setName(till.getName());
         updatedTill.setDescription(till.getDescription());
         updatedTill.setCurrentFloat(till.getCurrentFloat());
@@ -90,12 +127,58 @@ public class TillServiceImpl implements TillService {
     }
 
     @Override
-    public Till voidTill(Long id, int voidStatus, String voidByUsername) {
-        User voidedBy = userService.getUserByUsername(voidByUsername);
-        if (voidedBy == null || voidedBy.getVoided() == 1) {
+    @Transactional
+    public Till updateTillWithFunctions(Long id, TillRequest tillRequest, String updatedByUsername) {
+        User updatedBy = userService.getUserByUsername(updatedByUsername);
+        if (updatedBy == null || updatedBy.getVoided() == 1) {
             throw new EntityNotFoundException("Admin not found");
         }
+
+        Till existingTill = tillDao.findById(id);
+        if (existingTill == null || existingTill.getVoided() == 1) {
+            throw new EntityNotFoundException("Till not found or has been voided");
+        }
+
+        if (isTillUnique(tillRequest.getTill().getName(), id)) {
+            throw new IllegalArgumentException("Till with the same name already exists.");
+        }
+
+        // Update main fields
+        existingTill.setName(tillRequest.getTill().getName());
+        existingTill.setDescription(tillRequest.getTill().getDescription());
+        existingTill.setUpdatedBy(updatedBy);
+        existingTill.setUpdatedAt(LocalDateTime.now());
+
+        // Clear existing function mappings
+        existingTill.getTillFunctionMaps().clear();
+
+        // Add updated mappings
+        Set<Long> functionIds = tillRequest.getTillFunctionIds();
+        for (Long functionId : functionIds) {
+            TillFunction tillFunction = tillFunctionService.getTillFunctionById(functionId);
+
+            TillFunctionMap tillFunctionMap = new TillFunctionMap();
+            tillFunctionMap.setTill(existingTill);
+            tillFunctionMap.setTillFunction(tillFunction);
+            tillFunctionMap.setCreatedBy(updatedBy);
+            tillFunctionMap.setCreatedAt(LocalDateTime.now());
+
+            existingTill.getTillFunctionMaps().add(tillFunctionMap);
+        }
+
+        return tillDao.save(existingTill);
+    }
+
+
+    @Override
+    public Till voidTill(Long id, int voidStatus, String voidByUsername) {
+        User voidedBy = userService.getUserByUsername(voidByUsername);
         Till voidedTill = tillDao.findById(id);
+
+        if (voidedTill == null || voidedBy == null || voidedBy.getVoided() == 1) {
+            throw new EntityNotFoundException("Till or Admin not found");
+        }
+
         voidedTill.setVoided(voidStatus);
         voidedTill.setVoidedBy(voidedBy);
         voidedTill.setVoidedAt(LocalDateTime.now());
