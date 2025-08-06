@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,20 +22,21 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService, U
 
     @Override
     public UserDetails loadUserByUsername(String username) {
+
         User user = userDao.findByUsername(username);
 
         if (user == null) {
            throw new UsernameNotFoundException("User not found");
         }
 
+        if (user.getVoided() == 1) {
+            throw new UsernameNotFoundException("User account is deactivated");
+        }
+
         Set<GrantedAuthority> authorities = user.getUserRoles().stream()
                 .flatMap(userRole -> userRole.getRole().getRolePermissions().stream())
                 .map(rolePerm -> new SimpleGrantedAuthority(rolePerm.getPermission().getName()))
                 .collect(Collectors.toSet());
-
-        System.out.println("Authorities for " + username + ": " +
-                authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
-
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),

@@ -24,6 +24,10 @@ public class Transaction {
     @JsonSerialize(using = TillFunctionSerializer.class)
     private TillFunction tillFunction;
 
+    @ManyToOne
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
+
     @Column(nullable = false)
     private BigDecimal amount;
 
@@ -82,6 +86,14 @@ public class Transaction {
 
     public void setTillFunction(TillFunction tillFunction) {
         this.tillFunction = tillFunction;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     public BigDecimal getAmount() {
@@ -170,6 +182,7 @@ public class Transaction {
                 "id=" + id +
                 ", till=" + till +
                 ", tillFunction=" + tillFunction +
+                ", client=" + client +
                 ", amount=" + amount +
                 ", floatChange=" + floatChange +
                 ", cashChange=" + cashChange +

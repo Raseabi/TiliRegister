@@ -3,6 +3,7 @@ package com.tiliregister.app.controller;
 import com.tiliregister.app.model.TillFunction;
 import com.tiliregister.app.service.TillFunctionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -31,8 +32,14 @@ public class TillFunctionController {
 
     @PreAuthorize("hasAuthority('till:function:view')")
     @GetMapping
-    ResponseEntity<List<TillFunction>> getAllTillFunctions(){
-        return ResponseEntity.ok(tillFunctionService.getAllTillFunctions());
+    ResponseEntity<Page<TillFunction>> searchTillFunctions(
+            @RequestParam(name = "searchTerm", required = false) String searchTerm,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sortField,
+            @RequestParam(defaultValue = "asc") String sortOrder
+    ){
+        return ResponseEntity.ok(tillFunctionService.searchTillFunctions(searchTerm, page, size, sortField, sortOrder));
     }
 
     @PreAuthorize("hasAuthority('till:function:view')")
@@ -63,12 +70,6 @@ public class TillFunctionController {
     @PutMapping("/{id}")
     ResponseEntity<TillFunction> updateTillFunction(@PathVariable Long id, @RequestBody TillFunction tillFunction, Authentication authentication){
         String username = authentication.getName();
-        ///////////////////////
-        System.out.println("Received TillFunction:");
-        System.out.println("Name: " + tillFunction.getName());
-        System.out.println("Cash Direction: " + tillFunction.getCashChangeDirection());
-        System.out.println("Float Direction: " + tillFunction.getFloatChangeDirection());
-        /// ///////////////////
         TillFunction updateTillFunction = tillFunctionService.updateTillFunction(id, tillFunction, username);
         return ResponseEntity.ok(updateTillFunction);
     }

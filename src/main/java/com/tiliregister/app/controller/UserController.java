@@ -1,9 +1,11 @@
 package com.tiliregister.app.controller;
 
 import com.tiliregister.app.model.User;
+import com.tiliregister.app.model.UserRequest;
 import com.tiliregister.app.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -24,10 +26,23 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('user:create')")
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user, Authentication authentication) {
+    public ResponseEntity<User> createUser(@RequestBody UserRequest userRequest, Authentication authentication) {
         String username = authentication.getName();
-        User savedUser = userService.saveUser(user, username);
+        User savedUser = userService.saveUser(userRequest, username);
         return ResponseEntity.ok(savedUser);
+    }
+
+    @PreAuthorize("hasAuthority('user:view')")
+    @GetMapping
+    public ResponseEntity<Page<User>> searchUsers(
+            @RequestParam(name = "searchTerm", required = false) String searchTerm,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "surname") String sortField,
+            @RequestParam(defaultValue = "asc") String sortOrder
+    ) {
+        Page<User> result = userService.searchUsers(searchTerm, page, size, sortField, sortOrder);
+        return ResponseEntity.ok(result);
     }
 
     @PreAuthorize("hasAuthority('user:view')")
@@ -37,18 +52,12 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-  @PreAuthorize("hasAuthority('user:view')")
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
-    }
-
     @PreAuthorize("hasAuthority('user:edit')")
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user, Authentication authentication) {
-            String updatedBy = authentication.getName();
-            User updated = userService.updateUser(id, user, updatedBy);
-            return ResponseEntity.ok(updated);
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserRequest userRequest, Authentication authentication) {
+        String updatedBy = authentication.getName();
+        User updated = userService.updateUser(id, userRequest, updatedBy);
+        return ResponseEntity.ok(updated);
 
     }
 
@@ -67,4 +76,5 @@ public class UserController {
         User user = userService.voidUser(id, 0, restoredBy);
         return ResponseEntity.ok(user);
     }
+
 }

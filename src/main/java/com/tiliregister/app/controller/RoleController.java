@@ -1,11 +1,9 @@
 package com.tiliregister.app.controller;
 
 import com.tiliregister.app.model.Role;
-import com.tiliregister.app.model.Role;
-import com.tiliregister.app.model.TiliGroup;
-import com.tiliregister.app.model.User;
 import com.tiliregister.app.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -34,17 +32,29 @@ public class RoleController {
     }
 
     @PreAuthorize("hasAuthority('role:view')")
+    @GetMapping
+    public ResponseEntity<Page<Role>> searchRoles(
+            @RequestParam(name = "searchTerm", required = false) String searchTerm,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sortField,
+            @RequestParam(defaultValue = "asc") String sortOrder
+    ) {
+        Page<Role> result = roleService.searchRoles(searchTerm, page, size, sortField, sortOrder);
+        return ResponseEntity.ok(result);
+    }
+
+    @PreAuthorize("hasAuthority('role:view')")
     @GetMapping("/{id}")
-    public ResponseEntity<Role> getRole(@PathVariable Long id) {
+    public ResponseEntity<Role> getRoleById(@PathVariable Long id) {
         Role role = roleService.getRoleById(id);
         return ResponseEntity.ok(role);
     }
 
     @PreAuthorize("hasAuthority('role:view')")
-    @GetMapping
-    public ResponseEntity<List<Role>> getAllRoles() {
-        List<Role> roles = roleService.getAllRoles();
-        return ResponseEntity.ok(roles);
+    @GetMapping("/active")
+    public ResponseEntity<List<Role>> getActiveRoles() {
+        return ResponseEntity.ok(roleService.getActiveRoles());
     }
 
     @PreAuthorize("hasAuthority('role:edit')")

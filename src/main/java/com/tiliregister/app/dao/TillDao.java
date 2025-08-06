@@ -10,5 +10,6 @@ public interface TillDao {
     Till findById(Long id);
     Till findByName(String name);
     List<Till> findByVoidStatus(List<Integer> voidStatus);
+    List<Till> findByTiliGroupId(Long tiliGroupId);
     boolean isTillUnique(String name, Long excludeTillId);
   }

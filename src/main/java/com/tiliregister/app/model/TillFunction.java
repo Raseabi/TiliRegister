@@ -25,7 +25,7 @@ public class TillFunction {
     private TillFunctionChangeDirection cashChangeDirection;
 
     @Column(nullable = false)
-    private int deletable;
+    private int deletable = 1;
 
     @Column(nullable = true)
     private String description;

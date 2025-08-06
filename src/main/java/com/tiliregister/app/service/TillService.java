@@ -22,4 +22,7 @@ public interface TillService {
     BigDecimal adjustTillCashInHand(Long tillId, BigDecimal amount, String adjustSign);
     boolean isAdjustFloatPossible(Long tillId, BigDecimal amount, String adjustSign);
     boolean isAdjustCashInHandPossible(Long tillId, BigDecimal amount, String adjustSign);
+    List<Till> getTillsByGroupId(Long tiliGroupId);
+    boolean updateFloat(Long id, BigDecimal amount, String performedBy);
+    boolean updateCash(Long id, BigDecimal amount, String performedBy);
 }

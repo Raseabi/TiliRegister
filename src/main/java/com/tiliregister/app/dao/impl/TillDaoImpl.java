@@ -8,7 +8,6 @@ import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
@@ -47,8 +46,15 @@ public class TillDaoImpl implements TillDao {
     @Override
     public List<Till> findByVoidStatus(List<Integer> voidStatus) {
         return entityManager.createQuery(
-                        "SELECT t from Till t WHERE voided IN :voidStatus", Till.class)
+                        "SELECT t FROM Till t WHERE voided IN :voidStatus", Till.class)
                 .setParameter("voidStatus", voidStatus)
+                .getResultList();
+    }
+
+    @Override
+    public List<Till> findByTiliGroupId(Long tiliGroupId) {
+        return entityManager.createQuery("SELECT t FROM Till t WHERE t.tiliGroup.id = :tiliGroupId", Till.class)
+                .setParameter("tiliGroupId", tiliGroupId)
                 .getResultList();
     }
 

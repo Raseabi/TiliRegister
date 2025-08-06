@@ -1,24 +1,15 @@
 package com.tiliregister.app.model;
 
 public class ChangePasswordRequest {
-    private String username;
-    private String oldPassword;
+    private String currentPassword;
     private String newPassword;
 
-    public String getUsername() {
-        return username;
+    public String getCurrentPassword() {
+        return currentPassword;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getOldPassword() {
-        return oldPassword;
-    }
-
-    public void setOldPassword(String oldPassword) {
-        this.oldPassword = oldPassword;
+    public void setCurrentPassword(String currentPassword) {
+        this.currentPassword = currentPassword;
     }
 
     public String getNewPassword() {

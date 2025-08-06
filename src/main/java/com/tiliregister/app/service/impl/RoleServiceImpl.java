@@ -9,6 +9,7 @@ import com.tiliregister.app.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -55,7 +56,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<Role> getAllRoles() {
-        return roleDao.findByVoidStatus(List.of(0, 1));
+        return roleDao.findByVoidStatus(List.of(0,1));
     }
 
     @Override
@@ -109,5 +110,9 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public boolean doesRoleExist(String roleName, Long excludeRoleId) {
         return roleDao.doesRoleExist(roleName, excludeRoleId);
+    }
+
+    public Page<Role> searchRoles(String searchToken, int page, int size, String sortField, String sortOrder) {
+        return roleDao.searchRoles(searchToken, page, size, sortField, sortOrder);
     }
 }

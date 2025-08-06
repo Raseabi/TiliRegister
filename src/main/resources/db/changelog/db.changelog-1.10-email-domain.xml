@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="create-email-domain-table" author="alphonce">
+        <createTable tableName="email_domain">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="host" type="VARCHAR(120)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="username" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="password" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="port" type="VARCHAR(120)" defaultValue="587">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="insert-email_domain-1" author="alphonce">
+    <insert tableName="email_domain">
+        <column name="host" value="smtp.gmail.com"/>
+        <column name="username" value="araseabi@gmail.com"/>
+        <column name="password" value="yvqpvnyrzuzezuyo"/>
+        <column name="port" valueNumeric="587"/>
+        <column name="created_by" valueNumeric="1"/>
+        <column name="created_at" valueDate="2025-06-23T14:00:00"/>
+    </insert>
+    </changeSet>
+
+</databaseChangeLog>

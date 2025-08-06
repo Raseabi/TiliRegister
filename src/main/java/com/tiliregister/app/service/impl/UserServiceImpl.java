@@ -4,20 +4,17 @@ import com.tiliregister.app.dao.UserDao;
 import com.tiliregister.app.model.*;
 import com.tiliregister.app.service.EmailService;
 import com.tiliregister.app.service.RoleService;
-import com.tiliregister.app.service.UserRoleService;
 import com.tiliregister.app.service.UserService;
+import com.tiliregister.app.util.InternetConnectionChecker;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Array;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -37,21 +34,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User saveUser(User user, String createdByUsername) {
+    public User saveUser(UserRequest userRequest, String createdByUsername) {
         User createdBy = userDao.findByUsername(createdByUsername);
         if (createdBy == null || createdBy.getVoided() == 1) {
             throw new EntityNotFoundException("Creator (admin) not found");
         }
-        if (isEmailUnique(user.getEmailAddress().toLowerCase().trim(), null)) {
+
+        String emailAddress = userRequest.getUser().getEmailAddress().toLowerCase().trim();
+        if (isEmailUnique(emailAddress, null)) {
             throw new IllegalArgumentException("Email address already exists");
         }
-        if (isUsernameUnique(user.getUsername(), null)) {
-            throw new IllegalArgumentException("Username already exists");
-        }
+        LocalDateTime createdAt = LocalDateTime.now();
+        User user = new User();
+        user.setEmailAddress(emailAddress);
+        user.setUsername(emailAddress);
+        user.setSurname(userRequest.getUser().getSurname().trim());
+        user.setOthernames(userRequest.getUser().getOthernames().trim());
+        user.setContactNumber(userRequest.getUser().getContactNumber());
 
-        user.setEmailAddress(user.getEmailAddress().toLowerCase().trim());
         user.setCreatedBy(createdBy);
-        user.setCreatedAt(LocalDateTime.now());
+        user.setCreatedAt(createdAt);
 
         // Setup authentication
         String rawPassword = PasswordGenerator.generatePassword(8);
@@ -68,6 +70,24 @@ public class UserServiceImpl implements UserService {
         auth.setPasswordDateModified(LocalDateTime.now());
         auth.setUser(user);
         user.setUserAuthentication(auth);
+
+        //Set up roles
+        if (!userRequest.getRoleIds().isEmpty()) {
+            Set<UserRole> userRoles = userRequest.getRoleIds().stream()
+                    .map(roleId -> {
+                        UserRole userRole = new UserRole();
+                        Role role = roleService.getRoleById(roleId);
+                        userRole.setRole(role);
+                        userRole.setUser(user);
+                        userRole.setCreatedBy(createdBy);
+                        userRole.setCreatedAt(createdAt);
+
+                        return userRole;
+
+                    }).collect(Collectors.toSet());
+
+            user.setUserRoles(userRoles);
+        }
         //Send an email
         if (InternetConnectionChecker.isInternetAvailable()) {
             emailService.sendEmail(
@@ -84,7 +104,7 @@ public class UserServiceImpl implements UserService {
             );
         }
 
-        return userDao.save(user); // Cascade will persist UserRole and Auth
+        return userDao.save(user);
     }
 
     @Override
@@ -98,52 +118,60 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByEmailAddress(String emailAddress) {
+    public User getUserByEmailAddress(String emailAddress) {
         return userDao.findByEmailAddress(emailAddress);
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userDao.findByVoidStatus(List.of(0, 1));
-    }
-
-    @Override
-    public List<User> getActiveUsers() {
-        return userDao.findByVoidStatus(List.of(0));
-    }
-
-    @Override
-    public List<User> getInActiveUsers() {
-        return userDao.findByVoidStatus(List.of(1));
-    }
-
-    @Override
-    public User updateUser(Long id, User user, String updatedByUsername) {
+    public User updateUser(Long id, UserRequest userRequest, String updatedByUsername) {
         User existingUser = userDao.findById(id);
         User updatedBy = userDao.findByUsername(updatedByUsername);
 
-        if (existingUser == null || existingUser.getVoided() == 1 || updatedBy == null || updatedBy.getVoided() == 1) {
-            throw new EntityNotFoundException("User (to updated) or Admin not found");
+        if (existingUser == null || existingUser.getVoided() == 1) {
+            throw new EntityNotFoundException("User not found or has been deactivated");
         }
-        if (isEmailUnique(user.getEmailAddress(), id)) {
+
+        if (updatedBy == null || updatedBy.getVoided() == 1) {
+            throw new EntityNotFoundException("Admin not found or has been deactivated");
+        }
+
+        String newEmail = userRequest.getUser().getEmailAddress().toLowerCase().trim();
+        if (isEmailUnique(newEmail, id)) {
             throw new IllegalArgumentException("Email address already exists");
         }
-        if (isUsernameUnique(user.getUsername(), id)) {
-            throw new IllegalArgumentException("Username already exists");
-        }
 
-        // Only update mutable fields
-        existingUser.setUsername(user.getUsername());
-        existingUser.setSurname(user.getSurname());
-        existingUser.setOthernames(user.getOthernames());
-        existingUser.setEmailAddress(user.getEmailAddress().toLowerCase().trim());
-        existingUser.setContactNumber(user.getContactNumber());
+        LocalDateTime updatedAt = LocalDateTime.now();
 
+        // Update fields
+        existingUser.setUsername(newEmail); // username = email
+        existingUser.setSurname(userRequest.getUser().getSurname().trim());
+        existingUser.setOthernames(userRequest.getUser().getOthernames().trim());
+        existingUser.setEmailAddress(newEmail);
+        existingUser.setContactNumber(userRequest.getUser().getContactNumber().trim());
         existingUser.setUpdatedBy(updatedBy);
-        existingUser.setUpdatedAt(LocalDateTime.now());
+        existingUser.setUpdatedAt(updatedAt);
+
+        // Handle roles
+        existingUser.getUserRoles().clear();
+
+        if (!userRequest.getRoleIds().isEmpty()) {
+            Set<UserRole> userRoles = userRequest.getRoleIds().stream()
+                    .map(roleId -> {
+                        Role role = roleService.getRoleById(roleId);
+                        UserRole userRole = new UserRole();
+                        userRole.setUser(existingUser);
+                        userRole.setRole(role);
+                        userRole.setCreatedBy(updatedBy);
+                        userRole.setCreatedAt(updatedAt);
+                        return userRole;
+                    }).collect(Collectors.toSet());
+
+            existingUser.getUserRoles().addAll(userRoles);
+        }
 
         return userDao.save(existingUser);
     }
+
 
     @Override
     public User voidUser(Long id, int voidValue, String voidedByUsername) {
@@ -169,5 +197,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isEmailUnique(String emailAddress, Long excludeUserId) {
         return userDao.isEmailUnique(emailAddress, excludeUserId);
+    }
+
+    @Override
+    public Page<User> searchUsers(String searchToken, int page, int size, String sortField, String sortOrder) {
+        return userDao.searchUsers(searchToken, page, size, sortField, sortOrder);
     }
 }

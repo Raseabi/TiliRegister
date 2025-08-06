@@ -7,6 +7,7 @@ import com.tiliregister.app.model.User;
 import com.tiliregister.app.service.TiliGroupService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -106,5 +107,10 @@ public class TiliGroupServiceImpl implements TiliGroupService {
     @Override
     public boolean isTiliGroupRegistered(String tiliGroupName, Long excludeTiliGroupId) {
         return tiliGroupDao.tiliGroupRegistered(tiliGroupName, excludeTiliGroupId);
+    }
+
+    @Override
+    public Page<TiliGroup> searchTiliGroups(String searchToken, int page, int size, String sortField, String sortOrder) {
+        return tiliGroupDao.searchTiliGroups(searchToken, page, size, sortField, sortOrder);
     }
 }

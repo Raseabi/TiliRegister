@@ -10,6 +10,7 @@ import com.tiliregister.app.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -110,5 +111,10 @@ public class FloatTopUpServiceImpl implements FloatTopUpService {
         voidedFloatTopUp.setVoidedAt(LocalDateTime.now());
 
         return floatTopUpDao.save(voidedFloatTopUp);
+    }
+
+    @Override
+    public Page<FloatTopUp> searchFloats(String searchToken, int page, int size, String sortField, String sortOrder, Long tillId) {
+        return floatTopUpDao.searchFloats(searchToken, page, size, sortField, sortOrder, tillId);
     }
 }

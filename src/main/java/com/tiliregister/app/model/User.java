@@ -32,10 +32,10 @@ public class User {
     private String contactNumber;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private Set<UserRole> userRoles = new HashSet<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private UserAuthentication userAuthentication;
 
     @ManyToOne

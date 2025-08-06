@@ -1,4 +1,4 @@
-package com.tiliregister.app.model;
+package com.tiliregister.app.security;
 
 public class JwtResponse {
     private String token;

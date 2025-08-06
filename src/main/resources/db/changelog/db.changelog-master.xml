@@ -11,7 +11,10 @@
     <include file="db/changelog/db.changelog-1.3-permissions.xml"/>
     <include file="db/changelog/db.changelog-1.4-user-authentication.xml"/>
     <include file="db/changelog/db.changelog-1.5-role-permissions.xml" />
-    <include file="db/changelog/db.changelog-1.6-tili.xml" />
-    <include file="db/changelog/db.changelog-1.7-global-config.xml" />
+    <include file="db/changelog/db.changelog-1.6-global-config.xml" />
+    <include file="db/changelog/db.changelog-1.7-password-reset.xml" />
+    <include file="db/changelog/db.changelog-1.8-client.xml" />
+    <include file="db/changelog/db.changelog-1.9-tili.xml" />
+    <include file="db/changelog/db.changelog-1.10-email-domain.xml" />
 
 </databaseChangeLog>
