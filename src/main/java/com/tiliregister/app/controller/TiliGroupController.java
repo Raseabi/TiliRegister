@@ -1,8 +1,10 @@
 package com.tiliregister.app.controller;
 
 import com.tiliregister.app.model.TiliGroup;
+import com.tiliregister.app.model.User;
 import com.tiliregister.app.service.TiliGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -32,9 +34,15 @@ public class TiliGroupController {
 
     @PreAuthorize("hasAuthority('tili:group:view')")
     @GetMapping
-    public ResponseEntity<List<TiliGroup>> getAllTiliGroups() {
-        List<TiliGroup> tiliGroups = tiliGroupService.getAllTiliGroups();
-        return ResponseEntity.ok(tiliGroups);
+    public ResponseEntity<Page<TiliGroup>> searchTiliGroups(
+            @RequestParam(name = "searchTerm", required = false) String searchTerm,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sortField,
+            @RequestParam(defaultValue = "asc") String sortOrder
+    ) {
+        Page<TiliGroup> result = tiliGroupService.searchTiliGroups(searchTerm, page, size, sortField, sortOrder);
+        return ResponseEntity.ok(result);
     }
 
     @PreAuthorize("hasAuthority('tili:group:view')")

@@ -107,7 +107,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="insert-create-till-functions-1" author="alphonce">
+    <changeSet id="insert-till-functions-1" author="alphonce">
         <insert tableName="till_functions">
             <column name="name" value="Deposit"/>
             <column name="float_change_direction" value="out"/>
@@ -132,33 +132,6 @@
             <column name="cash_change_direction" value="none"/>
             <column name="deletable" valueNumeric="0"/>
             <column name="description" value="Merchant Payment. Float in, cash none"/>
-            <column name="created_by" valueNumeric="1"/>
-            <column name="created_at" valueDate="2025-06-23T14:00:00"/>
-        </insert>
-        <insert tableName="till_functions">
-            <column name="name" value="Electricity purchase"/>
-            <column name="float_change_direction" value="out"/>
-            <column name="cash_change_direction" value="in"/>
-            <column name="deletable" valueNumeric="1"/>
-            <column name="description" value="Purchase electricity. Float out, cash in"/>
-            <column name="created_by" valueNumeric="1"/>
-            <column name="created_at" valueDate="2025-06-23T14:00:00"/>
-        </insert>
-        <insert tableName="till_functions">
-            <column name="name" value="DSTV payment"/>
-            <column name="float_change_direction" value="out"/>
-            <column name="cash_change_direction" value="in"/>
-            <column name="deletable" valueNumeric="1"/>
-            <column name="description" value="DSTV Payment. Float out, cash in"/>
-            <column name="created_by" valueNumeric="1"/>
-            <column name="created_at" valueDate="2025-06-23T14:00:00"/>
-        </insert>
-        <insert tableName="till_functions">
-            <column name="name" value="Water bill payment"/>
-            <column name="float_change_direction" value="out"/>
-            <column name="cash_change_direction" value="in"/>
-            <column name="deletable" valueNumeric="1"/>
-            <column name="description" value="Water bill payment. Float out, cash in"/>
             <column name="created_by" valueNumeric="1"/>
             <column name="created_at" valueDate="2025-06-23T14:00:00"/>
         </insert>
@@ -209,6 +182,9 @@
             <column name="function_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
+            <column name="client_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
             <column name="amount" type="DECIMAL(12,2)" defaultValueNumeric="0.00">
                 <constraints nullable="false"/>
             </column>
@@ -243,6 +219,13 @@
                 baseColumnNames="function_id"
                 constraintName="fk_transaction_function"
                 referencedTableName="till_functions"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="transactions"
+                baseColumnNames="client_id"
+                constraintName="fk_transaction_client"
+                referencedTableName="clients"
                 referencedColumnNames="id"/>
     </changeSet>
 

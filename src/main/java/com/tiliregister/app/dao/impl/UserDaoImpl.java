@@ -1,20 +1,22 @@
 package com.tiliregister.app.dao.impl;
 
 import com.tiliregister.app.dao.UserDao;
-import com.tiliregister.app.model.Role;
 import com.tiliregister.app.model.User;
 import jakarta.persistence.TypedQuery;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import jakarta.persistence.criteria.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Repository  // Spring annotation to mark this as a data access component
+@Repository
 @Transactional
 public class UserDaoImpl implements UserDao {
 
@@ -108,4 +110,65 @@ public class UserDaoImpl implements UserDao {
         return count > 0;
     }
 
+    @Override
+    public Page<User> searchUsers(String searchToken, int page, int size, String sortField, String sortOrder) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<User> cq = cb.createQuery(User.class);
+        Root<User> user = cq.from(User.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (searchToken != null && !searchToken.trim().isEmpty()) {
+            String likeToken = "%" + searchToken.trim().toLowerCase() + "%";
+
+            predicates.add(cb.or(
+                    cb.like(cb.lower(user.get("surname")), likeToken),
+                    cb.like(cb.lower(user.get("othernames")), likeToken),
+                    cb.like(cb.lower(user.get("emailAddress")), likeToken),
+                    cb.like(cb.lower(user.get("contactNumber")), likeToken),
+                    cb.like(cb.lower(user.get("createdBy").get("surname")), likeToken),
+                    cb.like(cb.lower(user.get("createdBy").get("othernames")), likeToken)
+            ));
+        } else {
+            predicates.add(cb.equal(user.get("voided"), 0));
+        }
+
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
+        if (sortField != null && !sortField.isBlank()) {
+            Path<Object> sortPath = user.get(sortField);
+            cq.orderBy("desc".equalsIgnoreCase(sortOrder) ? cb.desc(sortPath) : cb.asc(sortPath));
+        }
+
+        // Fetch paginated result
+        TypedQuery<User> query = entityManager.createQuery(cq);
+        query.setFirstResult(page * size);
+        query.setMaxResults(size);
+        List<User> users = query.getResultList();
+
+        // Count query
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<User> countRoot = countQuery.from(User.class);
+        countQuery.select(cb.count(countRoot));
+
+        // Rebuild the same predicates with countRoot
+        List<Predicate> countPredicates = new ArrayList<>();
+        if (searchToken != null && !searchToken.trim().isEmpty()) {
+            String likeToken = "%" + searchToken.trim().toLowerCase() + "%";
+            countPredicates.add(cb.or(
+                    cb.like(cb.lower(countRoot.get("surname")), likeToken),
+                    cb.like(cb.lower(countRoot.get("othernames")), likeToken),
+                    cb.like(cb.lower(countRoot.get("emailAddress")), likeToken),
+                    cb.like(cb.lower(countRoot.get("contactNumber")), likeToken),
+                    cb.like(cb.lower(countRoot.get("createdBy").get("surname")), likeToken),
+                    cb.like(cb.lower(countRoot.get("createdBy").get("othernames")), likeToken)
+            ));
+        }  else {
+            countPredicates.add(cb.equal(countRoot.get("voided"), 0));
+        }
+        countQuery.where(cb.and(countPredicates.toArray(new Predicate[0])));
+        Long totalCount = entityManager.createQuery(countQuery).getSingleResult();
+
+        return new PageImpl<>(users, PageRequest.of(page, size), totalCount);
+    }
 }

@@ -1,7 +1,7 @@
 package com.tiliregister.app.service.impl;
 
 import com.tiliregister.app.dao.UserAuthenticationDao;
-import com.tiliregister.app.model.InternetConnectionChecker;
+import com.tiliregister.app.util.InternetConnectionChecker;
 import com.tiliregister.app.model.User;
 import com.tiliregister.app.model.UserAuthentication;
 import com.tiliregister.app.service.EmailService;
@@ -10,7 +10,6 @@ import com.tiliregister.app.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -47,63 +46,6 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     public UserAuthentication getUserAuthenticationByUserId(Long userId) {
         return userAuthenticationDao.findByUserId(userId);
     }
-
-    @Override
-    public boolean updateUserAuthentication(Long id, String rawPassword, String passwordStatus, Authentication authentication) {
-        UserAuthentication userAuth = userAuthenticationDao.findById(id);
-        if (userAuth == null) {
-            throw new EntityNotFoundException("User credentials not found");
-        }
-        try {
-            userAuth.setPassword(passwordEncoder.encode(rawPassword));
-            userAuth.setLoginAttempts(1);
-            userAuth.setResetPasswordAttempts(1);
-            userAuth.setPasswordStatus(passwordStatus);
-            userAuth.setPasswordDateModified(LocalDateTime.now());
-
-            userAuthenticationDao.save(userAuth);
-
-            //Send an email
-            if (InternetConnectionChecker.isInternetAvailable()) {
-                emailService.sendEmail(
-                        userAuth.getUser().getEmailAddress(),
-                        passwordStatus.equalsIgnoreCase("Reset") ? "Password reset notification" : "Password update notification",
-                        "Dear " + userAuth.getUser().getOthernames() + " " + userAuth.getUser().getSurname() + ",\n\n" +
-                                "Welcome! This message notifies you of the change this your login credentials.\n\n" +
-                                "Below are your credentials:\n\n" +
-                                "Username: " + userAuth.getUser().getUsername() + "\n" +
-                                "Password: " + rawPassword + "\n\n" +
-                                "Status: " + passwordStatus + "\n\n" +
-                                "You are strongly recommended to keep your login details private.\n\n" +
-                                "Regards,\n" +
-                                "System Admin"
-                );
-            }
-
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    @Transactional
-    public boolean changePassword(Long userId, String password) {
-        if (password == null || password.length() < 8) {
-            return false;
-        }
-        if (!password.matches("^(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$")) {
-            return false;
-        }
-        UserAuthentication userAuthentication = userAuthenticationDao.findByUserId(userId);
-        if (userAuthentication == null) {
-            throw new EntityNotFoundException("User not found");
-        }
-        userAuthentication.setPassword(passwordEncoder.encode(password));
-
-        return true; // JPA auto-flushes due to @Transactional
-    }
-
 
     @Override
     public int incrementLoginAttempt(Long userId) {
@@ -165,14 +107,42 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
 
         return passwordEncoder.matches(rawPassword, userAuth.getPassword());
     }
+    @Override
+    @Transactional
+    public boolean changePassword(Long userId, String password, String passwordStatus) {
+
+        UserAuthentication userAuthentication = userAuthenticationDao.findByUserId(userId);
+        if (userAuthentication == null) {
+            throw new EntityNotFoundException("User credentials not found");
+        }
+        userAuthentication.setPassword(passwordEncoder.encode(password));
+        userAuthentication.setPasswordStatus(passwordStatus);
+        userAuthentication.setPasswordDateModified(LocalDateTime.now());
+        userAuthentication.setLoginAttempts(1);
+        userAuthentication.setResetPasswordAttempts(1);
+
+        return true;
+    }
 
     @Override
-    public boolean changePasswordProcess(String username, String newPassword) {
+    public boolean changePasswordProcess(String username, String newPassword, String passwordStatus) {
         User user = userService.getUserByUsername(username);
-        if (!InternetConnectionChecker.isInternetAvailable()) return false;
 
-        if (!changePassword(user.getId(), newPassword)) return false;
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new IllegalArgumentException("Password must be 8+ characters long");
+        }
+        if (!newPassword.matches("^(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$")) {
+            throw new IllegalArgumentException("Password must contain at least one lowercase letter, one uppercase letter, and one special character.");
+        }
+        if (!changePassword(user.getId(), newPassword, passwordStatus)) return false;
 
+        if (InternetConnectionChecker.isInternetAvailable()) {
+                sendChangePasswordNotification(user);
+        }
+        return true;
+    }
+
+    private void sendChangePasswordNotification(User user){
         emailService.sendEmail(
                 user.getEmailAddress(),
                 "Password Changed - Tili System",
@@ -180,7 +150,6 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
                         "Your password was changed successfully. If you did not perform this action, please contact support immediately.\n\n" +
                         "Regards,\nSystem Admin"
         );
-        return true;
     }
 
     @Override
@@ -188,5 +157,9 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
         return false;
     }
 
-
+    @Override
+    public boolean isEmailRegistered(String emailAddress) {
+        User user = userService.getUserByEmailAddress(emailAddress);
+        return user != null && user.getVoided() != 1;
+    }
 }

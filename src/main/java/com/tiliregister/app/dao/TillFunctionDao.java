@@ -1,6 +1,7 @@
 package com.tiliregister.app.dao;
 
 import com.tiliregister.app.model.TillFunction;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -10,4 +11,5 @@ public interface TillFunctionDao {
     TillFunction findByName(String name);
     List<TillFunction> findByVoidStatus(List<Integer> voidStatus);
     boolean isTillFunctionUnique(String functionName, Long excludeFunctionId);
+    Page<TillFunction> searchTillFunctions(String searchToken, int page, int size, String sortField, String sortOrder);
 }

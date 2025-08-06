@@ -1,8 +1,10 @@
 package com.tiliregister.app.controller;
 
 import com.tiliregister.app.model.CashOut;
+import com.tiliregister.app.model.FloatTopUp;
 import com.tiliregister.app.service.CashOutService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -31,8 +33,18 @@ public class CashOutController {
 
     @PreAuthorize("hasAuthority('cashout:view')")
     @GetMapping
-    ResponseEntity<List<CashOut>> getAllCashOuts(){
-        return ResponseEntity.ok(cashOutService.getAllCashOuts());
+    ResponseEntity<Page<CashOut>> searchCashOuts(
+            @RequestParam(name = "searchTerm", required = false) String searchTerm,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortField,
+            @RequestParam(defaultValue = "desc") String sortOrder,
+            @RequestParam(required = false) Long tillId
+    ){
+        Page<CashOut> result = cashOutService.searchCashOuts(
+                searchTerm, page, size, sortField, sortOrder, tillId
+        );
+        return ResponseEntity.ok(result);
     }
 
     @PreAuthorize("hasAuthority('cashout:view')")

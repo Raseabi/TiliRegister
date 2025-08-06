@@ -7,6 +7,7 @@ import com.tiliregister.app.service.TillFunctionService;
 import com.tiliregister.app.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -115,5 +116,10 @@ public class TillFunctionServiceImpl implements TillFunctionService {
     @Override
     public boolean isTillFunctionUnique(String functionName, Long excludeFunctionId) {
         return tillFunctionDao.isTillFunctionUnique(functionName, excludeFunctionId);
+    }
+
+    @Override
+    public Page<TillFunction> searchTillFunctions(String searchToken, int page, int size, String sortField, String sortOrder) {
+        return tillFunctionDao.searchTillFunctions(searchToken, page, size, sortField, sortOrder);
     }
 }

@@ -33,10 +33,11 @@ public class UserAuthenticationDaoImpl implements UserAuthenticationDao {
 
     @Override
     public UserAuthentication findByUserId(Long userId) {
-        List<UserAuthentication> query = entityManager.createQuery("SELECT ua FROM UserAuthentication ua WHERE ua.user.id = :userId", UserAuthentication.class)
-        .setParameter("user", userId)
-        .setMaxResults(1)
-        .getResultList();
+        List<UserAuthentication> query = entityManager
+                .createQuery("SELECT ua FROM UserAuthentication ua WHERE ua.user.id = :userId", UserAuthentication.class)
+                .setParameter("userId", userId)
+                .setMaxResults(1)
+                .getResultList();
 
         return query.isEmpty() ? null : query.get(0);
     }

@@ -66,7 +66,7 @@ public class TillServiceImpl implements TillService {
         Set<Long> functionIds = tillRequest.getTillFunctionIds();
 
 
-        for (Long functionId : functionIds){
+        for (Long functionId : functionIds) {
             TillFunction tillFunction = tillFunctionService.getTillFunctionById(functionId);
             TillFunctionMap tillFunctionMap = new TillFunctionMap();
             tillFunctionMap.setTillFunction(tillFunction);
@@ -117,8 +117,6 @@ public class TillServiceImpl implements TillService {
 
         updatedTill.setName(till.getName());
         updatedTill.setDescription(till.getDescription());
-        updatedTill.setCurrentFloat(till.getCurrentFloat());
-        updatedTill.setCurrentCashInHand(till.getCurrentCashInHand());
 
         updatedTill.setUpdatedBy(updatedBy);
         updatedTill.setUpdatedAt(LocalDateTime.now());
@@ -244,4 +242,41 @@ public class TillServiceImpl implements TillService {
             return true;
         }
     }
+
+    @Override
+    public List<Till> getTillsByGroupId(Long tiliGroupId) {
+        return tillDao.findByTiliGroupId(tiliGroupId);
+    }
+
+    @Override
+    @Transactional
+    public boolean updateFloat(Long id, BigDecimal amount, String performedBy) {
+        try {
+            Till till = tillDao.findById(id);
+            if (till == null) {
+                throw new EntityNotFoundException("Till with ID: " + id + " not found");
+            }
+            till.setCurrentFloat(amount);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update float for till ID " + id, e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean updateCash(Long id, BigDecimal amount, String performedBy) {
+        try {
+            Till till = tillDao.findById(id);
+            if (till == null) {
+                throw new EntityNotFoundException("Till with ID: " + id + " not found");
+            }
+            till.setCurrentCashInHand(amount);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update cash in hand for till ID " + id, e);
+        }
+    }
+
+
 }

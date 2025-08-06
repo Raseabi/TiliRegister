@@ -1,6 +1,7 @@
 package com.tiliregister.app.service;
 
 import com.tiliregister.app.model.Role;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -14,4 +15,5 @@ public interface RoleService {
     Role updateRole(Long id, Role role, String updatedByUsername);
     Role voidRole(Long roleId, int voidValue, String voidedByUsername);
     boolean doesRoleExist(String roleName, Long excludeRoleId);
+    Page<Role> searchRoles(String searchToken, int page, int size, String sortField, String sortOrder);
 }

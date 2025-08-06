@@ -45,7 +45,7 @@
     <changeSet id="insert-users-1" author="alphonce">
         <insert tableName="users">
             <column name="id" valueNumeric="1"/>
-            <column name="username" value="admin"/>
+            <column name="username" value="admin@example.com"/>
             <column name="surname" value="System"/>
             <column name="othernames" value="Administrator"/>
             <column name="email_address" value="admin@example.com"/>

@@ -30,7 +30,7 @@ public class RolePermissionController {
         this.rolePermissionService = rolePermissionService;
     }
 
-    //@PreAuthorize("hasAuthority('role:create')")
+    @PreAuthorize("hasAuthority('role:create')")
     @PostMapping
     public ResponseEntity<String> createRolePermission(
             @RequestBody RolePermissionRequest request,

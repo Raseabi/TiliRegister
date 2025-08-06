@@ -1,6 +1,7 @@
 package com.tiliregister.app.dao;
 
 import com.tiliregister.app.model.TiliGroup;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -10,4 +11,5 @@ public interface TiliGroupDao {
     TiliGroup findByName(String name);
     List<TiliGroup> findTiliGroupByVoidStatus(List<Integer> voidStatus);
     boolean tiliGroupRegistered(String tiliGroupName, Long excludeTiliGroupId);
+    Page<TiliGroup> searchTiliGroups(String searchToken, int page, int size, String sortField, String sortOrder);
 }

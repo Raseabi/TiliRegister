@@ -1,6 +1,7 @@
 package com.tiliregister.app.service;
 
 import com.tiliregister.app.model.FloatTopUp;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -14,4 +15,5 @@ public interface FloatTopUpService {
     List<FloatTopUp> getVoidedFloatTopUps();
     FloatTopUp updateFloatTopUp(Long id, FloatTopUp floatTopUp, String updatedByUsername);
     FloatTopUp voidFloatTopUp(Long id, int voidStatus, String voidedByUsername);
+    Page<FloatTopUp> searchFloats(String searchToken, int page, int size, String sortField, String sortOrder, Long tillId);
 }
