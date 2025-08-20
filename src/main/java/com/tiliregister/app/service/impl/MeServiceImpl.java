@@ -29,9 +29,14 @@ public class MeServiceImpl implements MeService {
     }
 
     @Override
-    public User getMe(String username) {
+    public User getMeByUsername(String username) {
         Long meId = userService.getUserByUsername(username).getId();
         return meDao.findMeById(meId);
+    }
+
+    @Override
+    public User getMeById(Long id) {
+        return meDao.findMeById(id);
     }
 
     @Override

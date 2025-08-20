@@ -2,13 +2,12 @@ package com.tiliregister.app.service.impl;
 
 import com.tiliregister.app.dao.TransactionDao;
 import com.tiliregister.app.model.*;
-import com.tiliregister.app.service.TillFunctionService;
-import com.tiliregister.app.service.TillService;
-import com.tiliregister.app.service.TransactionService;
-import com.tiliregister.app.service.UserService;
+import com.tiliregister.app.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,13 +21,15 @@ public class TransactionServiceImpl implements TransactionService {
     private final UserService userService;
     private final TillService tillService;
     private final TillFunctionService tillFunctionService;
+    private final ClientService clientService;
 
     @Autowired
-    public TransactionServiceImpl(TransactionDao transactionDao, UserService userService, TillService tillService, TillFunctionService tillFunctionService) {
+    public TransactionServiceImpl(TransactionDao transactionDao, UserService userService, TillService tillService, TillFunctionService tillFunctionService, ClientService clientService) {
         this.transactionDao = transactionDao;
         this.userService = userService;
         this.tillService = tillService;
         this.tillFunctionService = tillFunctionService;
+        this.clientService = clientService;
     }
 
     @Override
@@ -46,12 +47,14 @@ public class TransactionServiceImpl implements TransactionService {
         if (!isTransactionValid(transaction, tillService)) {
             throw new IllegalStateException("Transaction is not valid");
         }
-
+        Client client = clientService.getOrCreateClient(
+                transaction.getClient().getClientNumber(),
+                transaction.getClient().getClientName()
+        );
+        transaction.setClient(client);
         processTransactionEffects(transaction, tillService);
-
         return transactionDao.save(transaction);
     }
-
 
     @Override
     public Transaction getTransactionById(Long id) {
@@ -258,6 +261,11 @@ public class TransactionServiceImpl implements TransactionService {
         } else if (function.getCashChangeDirection() == TillFunctionChangeDirection.out) {
             tillService.adjustTillCashInHand(tillId, amount, "+");
         }
+    }
+
+    @Override
+    public Page<Transaction> searchTransactions(String searchToken, int page, int size, String sortField, String sortOrder, Long tillId) {
+        return transactionDao.searchTransactions(searchToken, page, size, sortField, sortOrder, tillId);
     }
 
     private BigDecimal transactionChangeDirection(BigDecimal amount, String changeDirection) {

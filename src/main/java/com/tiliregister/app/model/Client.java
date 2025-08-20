@@ -3,7 +3,7 @@ package com.tiliregister.app.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "clients")
+@Table(name = "clients", uniqueConstraints = @UniqueConstraint(columnNames = "clientNumber"))
 public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -3,6 +3,7 @@ package com.tiliregister.app.controller;
 import com.tiliregister.app.model.Transaction;
 import com.tiliregister.app.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -33,8 +34,16 @@ public class TransactionController {
 
     @PreAuthorize("hasAuthority('transaction:view')")
     @GetMapping
-    ResponseEntity<List<Transaction>> getAllTransactions(){
-        return ResponseEntity.ok(transactionService.getAllTransactions());
+    public ResponseEntity<Page<Transaction>> searchTransactions(
+            @RequestParam(name = "searchTerm", required = false) String searchTerm,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortField,
+            @RequestParam(defaultValue = "desc") String sortOrder,
+            @RequestParam(required = false) Long tillId
+    ) {
+        Page<Transaction> result = transactionService.searchTransactions(searchTerm, page, size, sortField, sortOrder, tillId);
+        return ResponseEntity.ok(result);
     }
 
     @PreAuthorize("hasAuthority('transaction:view')")

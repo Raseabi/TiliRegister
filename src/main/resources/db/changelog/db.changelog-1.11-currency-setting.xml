@@ -1,0 +1,37 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+      http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="1-create-currency-setting-table" author="alphonce">
+        <createTable tableName="currency_setting">
+            <column name="id" type="INT" defaultValueNumeric="1">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="currency_code" type="VARCHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addDefaultValue
+                columnName="updated_at"
+                defaultValueComputed="CURRENT_TIMESTAMP"
+                tableName="currency_setting"/>
+
+        <insert tableName="currency_setting">
+            <column name="id" valueNumeric="1"/>
+            <column name="currency_code" value="LSL"/>
+            <column name="updated_by" valueNumeric="1"/>
+            <column name="updated_at" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

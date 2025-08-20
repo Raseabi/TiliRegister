@@ -139,6 +139,22 @@
             <column name="description" value="Allows deleting roles"/>
         </insert>
         <insert tableName="permissions">
+            <column name="name" value="client:view"/>
+            <column name="description" value="Allows deleting clients"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="name" value="client:create"/>
+            <column name="description" value="Allows deleting clients"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="name" value="client:edit"/>
+            <column name="description" value="Allows deleting clients"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="name" value="client:delete"/>
+            <column name="description" value="Allows deleting clients"/>
+        </insert>
+        <insert tableName="permissions">
             <column name="name" value="user:view"/>
             <column name="description" value="Allows viewing users profiles"/>
         </insert>
@@ -170,6 +186,7 @@
             <column name="name" value="setting:delete"/>
             <column name="description" value="Allows deleting settings"/>
         </insert>
+
     </changeSet>
 
 </databaseChangeLog>

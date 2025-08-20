@@ -24,7 +24,7 @@ public class Transaction {
     @JsonSerialize(using = TillFunctionSerializer.class)
     private TillFunction tillFunction;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 

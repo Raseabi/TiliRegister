@@ -1,6 +1,7 @@
 package com.tiliregister.app.service;
 
 import com.tiliregister.app.model.Transaction;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -20,4 +21,5 @@ public interface TransactionService {
     boolean isTransactionValid(Transaction transaction, TillService tillService);
     void processTransactionEffects(Transaction transaction, TillService tillService);
     void processTransactionReversalEffects(Transaction transaction, TillService tillService);
+    Page<Transaction> searchTransactions(String searchToken, int page, int size, String sortField, String sortOrder, Long tillId);
 }

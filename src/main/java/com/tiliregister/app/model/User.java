@@ -31,7 +31,7 @@ public class User {
     @Column(name = "contact_number", nullable = false, length = 15)
     private String contactNumber;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<UserRole> userRoles = new HashSet<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
