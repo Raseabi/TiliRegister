@@ -16,5 +16,6 @@
     <include file="db/changelog/db.changelog-1.8-client.xml" />
     <include file="db/changelog/db.changelog-1.9-tili.xml" />
     <include file="db/changelog/db.changelog-1.10-email-domain.xml" />
+    <include file="db/changelog/db.changelog-1.11-currency-setting.xml" />
 
 </databaseChangeLog>

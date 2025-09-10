@@ -1,9 +1,12 @@
 package com.tiliregister.app.controller;
 
 import com.tiliregister.app.model.*;
+import com.tiliregister.app.security.CustomUserDetails;
 import com.tiliregister.app.security.JwtUtil;
+import com.tiliregister.app.service.CustomUserDetailsService;
 import com.tiliregister.app.service.PasswordResetTokenService;
 import com.tiliregister.app.service.UserAuthenticationService;
+import com.tiliregister.app.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +17,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -35,6 +39,9 @@ public class UserAuthenticationController {
     private final UserAuthenticationService userAuthenticationService;
 
     @Autowired
+    CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
     public UserAuthenticationController(UserAuthenticationService userAuthenticationService) {
         this.userAuthenticationService = userAuthenticationService;
     }
@@ -42,19 +49,16 @@ public class UserAuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
 
-        // 1. This checks username + password against UserDetailsService
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(), loginRequest.getPassword()
                 )
         );
 
-        // 2. Get the user
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        // 3. Generate JWT using validated username
-        String accessToken = jwtUtil.generateAccessToken(userDetails.getUsername());
-        String refreshToken = jwtUtil.generateRefreshToken(userDetails.getUsername());
+        String accessToken = jwtUtil.generateAccessToken(userDetails.getUserId(), userDetails.getUsername());
+        String refreshToken = jwtUtil.generateRefreshToken(userDetails.getUserId(), userDetails.getUsername());
 
         ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
@@ -78,18 +82,30 @@ public class UserAuthenticationController {
         return ResponseEntity.ok(Map.of("message", "Login successful"));
     }
 
+
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
+    public ResponseEntity<?> refreshToken(
+            @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletResponse response) {
+
         if (refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing refresh token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid or missing refresh token"));
         }
 
+        Long userId = jwtUtil.extractUserId(refreshToken);
         String username = jwtUtil.extractUsername(refreshToken);
-        String newAccessToken = jwtUtil.generateAccessToken(username);
+
+        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserById(userId);
+        if (userDetails == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        String newAccessToken = jwtUtil.generateAccessToken(userId, username);
 
         ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
                 .httpOnly(true)
-                .secure(false) // change for production HTTPS
+                .secure(false) // set true in production HTTPS
                 .path("/")
                 .maxAge(15 * 60)
                 .sameSite("Lax")

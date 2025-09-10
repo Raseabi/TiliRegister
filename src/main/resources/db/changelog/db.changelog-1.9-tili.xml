@@ -128,8 +128,8 @@
         </insert>
         <insert tableName="till_functions">
             <column name="name" value="Merchant"/>
-            <column name="float_change_direction" value="in"/>
-            <column name="cash_change_direction" value="none"/>
+            <column name="float_change_direction" value="out"/>
+            <column name="cash_change_direction" value="in"/>
             <column name="deletable" valueNumeric="0"/>
             <column name="description" value="Merchant Payment. Float in, cash none"/>
             <column name="created_by" valueNumeric="1"/>

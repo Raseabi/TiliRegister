@@ -2,6 +2,7 @@ package com.tiliregister.app.service.impl;
 
 import com.tiliregister.app.dao.UserDao;
 import com.tiliregister.app.model.User;
+import com.tiliregister.app.security.CustomUserDetails;
 import com.tiliregister.app.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,14 +22,11 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService, U
     private UserDao userDao;
 
     @Override
-    public UserDetails loadUserByUsername(String username) {
-
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userDao.findByUsername(username);
-
         if (user == null) {
-           throw new UsernameNotFoundException("User not found");
+            throw new UsernameNotFoundException("User not found");
         }
-
         if (user.getVoided() == 1) {
             throw new UsernameNotFoundException("User account is deactivated");
         }
@@ -38,11 +36,24 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService, U
                 .map(rolePerm -> new SimpleGrantedAuthority(rolePerm.getPermission().getName()))
                 .collect(Collectors.toSet());
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getUserAuthentication().getPassword(),
-                authorities
-        );
+        return new CustomUserDetails(user, authorities);
     }
 
+    @Override
+    public UserDetails loadUserById(Long userId) throws UsernameNotFoundException {
+        User user = userDao.findById(userId);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        if (user.getVoided() == 1) {
+            throw new UsernameNotFoundException("User account is deactivated");
+        }
+
+        Set<GrantedAuthority> authorities = user.getUserRoles().stream()
+                .flatMap(userRole -> userRole.getRole().getRolePermissions().stream())
+                .map(rolePerm -> new SimpleGrantedAuthority(rolePerm.getPermission().getName()))
+                .collect(Collectors.toSet());
+
+        return new CustomUserDetails(user, authorities);
+    }
 }

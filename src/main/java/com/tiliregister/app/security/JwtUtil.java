@@ -26,32 +26,49 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateAccessToken(String username) {
-        return generateToken(username, ACCESS_TOKEN_EXPIRATION);
+    // Generate access token with userId as subject
+    public String generateAccessToken(Long userId, String username) {
+        return generateToken(userId, username, ACCESS_TOKEN_EXPIRATION);
     }
 
-    public String generateRefreshToken(String username) {
-        return generateToken(username, REFRESH_TOKEN_EXPIRATION);
+    // Generate refresh token with userId as subject
+    public String generateRefreshToken(Long userId, String username) {
+        return generateToken(userId, username, REFRESH_TOKEN_EXPIRATION);
     }
 
-    private String generateToken(String username, long durationMillis) {
+    private String generateToken(Long userId, String username, long durationMillis) {
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(String.valueOf(userId))   // subject = userId
+                .claim("username", username)          // optional claim
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + durationMillis))
                 .signWith(key)
                 .compact();
     }
 
+    // Extract userId (from subject)
+    public Long extractUserId(String token) {
+        return Long.parseLong(
+                Jwts.parserBuilder()
+                        .setSigningKey(key)
+                        .build()
+                        .parseClaimsJws(token)
+                        .getBody()
+                        .getSubject()
+        );
+    }
+
+    // Extract username (from claims)
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .getSubject();
+                .get("username", String.class);
     }
 
+    // Validate token (signature + expiration)
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()

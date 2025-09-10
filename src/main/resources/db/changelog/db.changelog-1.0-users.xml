@@ -45,10 +45,10 @@
     <changeSet id="insert-users-1" author="alphonce">
         <insert tableName="users">
             <column name="id" valueNumeric="1"/>
-            <column name="username" value="admin@example.com"/>
+            <column name="username" value="admin@alphacorporation.tech"/>
             <column name="surname" value="System"/>
             <column name="othernames" value="Administrator"/>
-            <column name="email_address" value="admin@example.com"/>
+            <column name="email_address" value="admin@alphacorporation.tech"/>
             <column name="contact_number" value="+26650000000"/>
             <column name="created_by" valueNumeric="1"/>
             <column name="created_at" valueDate="2025-06-23T14:00:00"/>
